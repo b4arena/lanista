@@ -1,0 +1,15 @@
+# Generated output (regenerate with `./lanista.py fetch`)
+model_index.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.mypy_cache/
+.ruff_cache/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp

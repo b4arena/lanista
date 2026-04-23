@@ -1,0 +1,220 @@
+{
+  "_schema": "Hand-curated notes. Tier 1=frontier, 4=local/free.",
+  "_updated": "2026-04-23",
+  "_source": "Gkisokay LLM Model Stack (April 2026)",
+  "models": {
+    "claude-opus-4-6": {
+      "tier": 1,
+      "strengths": [
+        "#1 agentic terminal coding via Claude Code",
+        "Adaptive thinking, agent teams, context compaction",
+        "76% long-ctx retrieval @ 1M"
+      ],
+      "weaknesses": [
+        "Community reports inconsistency lately",
+        "External dev only - not in internal agent runtimes"
+      ],
+      "use_for": "Complex external dev via Claude Code, multi-file refactoring"
+    },
+    "claude-opus-4-7": {
+      "tier": 1,
+      "strengths": [
+        "Latest Opus",
+        "1M context",
+        "128K output"
+      ],
+      "weaknesses": [
+        "Premium pricing"
+      ],
+      "use_for": "Successor to 4.6; use when 4.6 inconsistency bites"
+    },
+    "gpt-5.4": {
+      "tier": 1,
+      "strengths": [
+        "Superhuman computer use (OSWorld 75%)",
+        "Real multi-hour planning",
+        "Steerable planner + judge in Codex"
+      ],
+      "weaknesses": [
+        "$100/month plan for best access"
+      ],
+      "use_for": "External Codex-driven complex features"
+    },
+    "glm-5.1": {
+      "tier": 1,
+      "strengths": [
+        "#1 SWE-Pro globally",
+        "8-hour autonomous execution",
+        "MIT license, open weights",
+        "3x cheaper than Opus on input"
+      ],
+      "weaknesses": [
+        "Benchmarks self-reported by Z.AI (pending independent verification)"
+      ],
+      "use_for": "Long-horizon agentic coding, sustained optimization loops"
+    },
+    "minimax-m2.7": {
+      "tier": 2,
+      "strengths": [
+        "97% skill adherence on 40+ skills",
+        "Multi-agent teams"
+      ],
+      "weaknesses": [
+        "API only - not open weights"
+      ],
+      "use_for": "OpenClaw execution backbone, high-volume agent tasks"
+    },
+    "kimi-k2.5": {
+      "tier": 2,
+      "strengths": [
+        "Long-horizon stability",
+        "First open-weight trained for parallel agentic work",
+        "384 experts, 1T params / 32B active"
+      ],
+      "weaknesses": [
+        "~6x more output tokens than peers - budget carefully"
+      ],
+      "use_for": "Long-horizon task chains, multi-source browsing"
+    },
+    "grok-4.20": {
+      "tier": 2,
+      "strengths": [
+        "Lowest hallucination rate on market",
+        "Native multi-agent API (4-16 parallel)",
+        "2M context window, 199 t/s"
+      ],
+      "weaknesses": [],
+      "use_for": "Hallucination-sensitive pipelines, long-context research"
+    },
+    "deepseek-v3.2": {
+      "tier": 2,
+      "strengths": [
+        "90% of GPT-5.4 performance at 1/50th cost",
+        "Open weights, MIT license"
+      ],
+      "weaknesses": [],
+      "use_for": "Cost-floor frontier reasoning, high-volume coding"
+    },
+    "claude-sonnet-4-6": {
+      "tier": 3,
+      "strengths": [
+        "98% of Opus coding at 1/5 cost",
+        "1M context, computer use 94% accuracy",
+        "Prompt injection resistance on par with Opus"
+      ],
+      "weaknesses": [
+        "API only - no $10/mo plan"
+      ],
+      "use_for": "Daily coding, content automation, Anthropic-ecosystem agents"
+    },
+    "gpt-5.4-mini": {
+      "tier": 3,
+      "strengths": [
+        "93.4% tool-call reliability",
+        "ChatGPT OAuth = no API billing",
+        "2x faster than GPT-5 mini, 400K context"
+      ],
+      "weaknesses": [],
+      "use_for": "Hermes conscious layer, 6-9 turn debates"
+    },
+    "gemini-3.1-pro": {
+      "tier": 3,
+      "strengths": [
+        "Native video+audio in one API call",
+        "7.5x cheaper than Opus on input",
+        "3 thinking levels"
+      ],
+      "weaknesses": [
+        "Dropped from Tier 1 - behind new frontier bar on reasoning"
+      ],
+      "use_for": "Multimodal agents, doc-heavy pipelines"
+    },
+    "qwen3.6-plus": {
+      "tier": 3,
+      "strengths": [
+        "FREE via OpenRouter",
+        "1M context",
+        "Near-frontier coding"
+      ],
+      "weaknesses": [
+        "Free-tier rate limits; preview window may close"
+      ],
+      "use_for": "Any Tier 3 task at $0"
+    },
+    "llama-4-maverick": {
+      "tier": 3,
+      "strengths": [
+        "Open weights, Apache 2.0",
+        "EU/data sovereignty - self-host at zero marginal cost",
+        "9-23x price-perf vs GPT-4o"
+      ],
+      "weaknesses": [],
+      "use_for": "Self-hosted Tier 3, data sovereignty"
+    },
+    "mistral-small-4": {
+      "tier": 3,
+      "strengths": [
+        "Unifies Magistral + Pixtral + Devstral in one model",
+        "Apache 2.0, self-hostable",
+        "75% less output verbosity than peers"
+      ],
+      "weaknesses": [],
+      "use_for": "Budget-conscious agents, one-model-replacing-three"
+    },
+    "qwen3.5-9b": {
+      "tier": 4,
+      "strengths": [
+        "Runs on 16GB RAM",
+        "Always-on subconscious loop viable",
+        "Beats GPT-OSS-120B at 13x smaller",
+        "5GB VRAM @ 4-bit"
+      ],
+      "weaknesses": [],
+      "use_for": "Always-on ideation loop, curation pass"
+    },
+    "qwen3.5-27b": {
+      "tier": 4,
+      "strengths": [
+        "32GB RAM local",
+        "Stronger instruction following than 9B"
+      ],
+      "weaknesses": [],
+      "use_for": "Local summarization, routing, complex micro classification"
+    },
+    "gemma-4-31b": {
+      "tier": 4,
+      "strengths": [
+        "Apache 2.0 commercial",
+        "#3 Arena open leaderboard",
+        "Dramatic leap over Gemma 3"
+      ],
+      "weaknesses": [
+        "Slower inference vs Qwen3.5-27B"
+      ],
+      "use_for": "Local agentic sub-tasks with commercial deployment"
+    },
+    "deepseek-r1-distill": {
+      "tier": 4,
+      "strengths": [
+        "94.3% MATH-500",
+        "Best chain-of-thought at $0",
+        "MIT license"
+      ],
+      "weaknesses": [
+        "OpenRouter free-tier rate limits"
+      ],
+      "use_for": "Reasoning-heavy micro tasks, math/logic classification"
+    },
+    "glm-4.5-air": {
+      "tier": 4,
+      "strengths": [
+        "Purpose-built for agent tool use + web browsing",
+        "#1 OSS for agent tasks"
+      ],
+      "weaknesses": [
+        "Not a trimmed general model - narrow focus"
+      ],
+      "use_for": "Lightweight agentic sub-tasks, web browsing agents"
+    }
+  }
+}
