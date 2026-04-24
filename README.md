@@ -9,6 +9,8 @@ lanista is a local model catalog and picker. It aggregates:
 
 The result: 2,700+ models, with per-task picks that are citation-grounded and verifiable.
 
+**→ [`docs/`](docs/) — full walkthroughs, scenario sweep, Pareto analysis, three-lens workflow**
+
 ## Three lenses
 
 Most "which model?" questions have a shape. lanista has a tool for each:
@@ -62,16 +64,6 @@ Ten deliberately diverse tasks were each routed through `pick`. In four of ten, 
 - **On-device, privacy-sensitive** → three open-weight models (Gemma, Qwen MoE) — no hosted models at all
 
 The last one is the most striking: the catalog has no "runs locally" column. The subagent picked correctly by reaching into the opinion corpus (Willison's MLX recipe, Qwen-on-MacBook post) for a signal the table lacks. **The opinion block is not decoration.**
-
-## See it in action
-
-A full walkthrough — every command executed live, every output real — lives in [`docs/lanista-demo.md`](docs/lanista-demo.md). It was built with [`showboat`](https://github.com/simonw/showboat) so you can verify the outputs still match current reality:
-
-```bash
-showboat verify docs/lanista-demo.md
-```
-
-More docs — the three-lens workflow, scenario sweep results, Pareto sweet-spot analysis — are in [`docs/`](docs/).
 
 ## License
 
