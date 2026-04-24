@@ -18,6 +18,29 @@ MAX_OPINIONS = 40
 MAX_CATALOG_ROWS = 60
 EXCERPT_CHARS = 400
 
+_MODALITY_SHORT = {"text": "txt", "image": "img", "audio": "aud", "video": "vid", "pdf": "pdf"}
+_CAP_SHORT = {
+    "pdf_input": "pdf",
+    "computer_use": "cu",
+    "function_calling": "fn",
+    "vision": "vis",
+    "reasoning": "think",
+}
+
+
+def _compress_modalities(vals) -> str:
+    if not vals:
+        return "-"
+    out = [_MODALITY_SHORT.get(v, v) for v in vals]
+    return "+".join(out)
+
+
+def _compress_caps(vals) -> str:
+    if not vals:
+        return "-"
+    out = [_CAP_SHORT[v] for v in vals if v in _CAP_SHORT]
+    return ",".join(out) if out else "-"
+
 
 def _obs_extracted(obs_list: list[dict], source: str) -> dict:
     for o in obs_list:
@@ -65,11 +88,16 @@ def _build_rows(models: dict) -> list[dict]:
     for mid, entry in models.items():
         obs = entry.get("observations") or []
         lm = _obs_extracted(obs, "lmarena").get("lmarena_ratings") or {}
+        notes = entry.get("notes") or {}
         rows.append(
             {
                 "model": mid,
                 "price": _fmt_price(entry.get("pricing_per_million")),
                 "ctx": entry.get("context_window"),
+                "modalities": _compress_modalities(entry.get("modalities")),
+                "caps": _compress_caps(entry.get("capabilities")),
+                "tier": notes.get("tier") if notes.get("tier") is not None else None,
+                "use_for": notes.get("use_for"),
                 "aider": _aider_pass(obs),
                 "lm_overall": _lm_rating(lm, "overall"),
                 "lm_coding": _lm_rating(lm, "coding"),
@@ -93,6 +121,7 @@ def _build_rows(models: dict) -> list[dict]:
 def _format_catalog_table(rows: list[dict]) -> str:
     headers = [
         "model", "price_$/Mtok", "ctx", "aider",
+        "modalities", "caps", "tier",
         "lm_overall", "lm_coding", "lm_writing",
         "lm_hard", "lm_long", "lm_english", "lm_chinese", "lm_document",
     ]
@@ -109,6 +138,9 @@ def _format_catalog_table(rows: list[dict]) -> str:
                     r["price"],
                     _cell(r["ctx"]),
                     _aider_cell(r["aider"]),
+                    r["modalities"],
+                    r["caps"],
+                    _cell(r["tier"]),
                     _cell(r["lm_overall"]),
                     _cell(r["lm_coding"]),
                     _cell(r["lm_writing"]),
@@ -121,6 +153,19 @@ def _format_catalog_table(rows: list[dict]) -> str:
             )
             + " |"
         )
+    return "\n".join(lines)
+
+
+def _format_tier_notes(rows: list[dict]) -> str:
+    lines: list[str] = []
+    for r in rows:
+        tier = r.get("tier")
+        use_for = r.get("use_for")
+        if tier is None or not use_for or tier > 2:
+            continue
+        lines.append(f"[tier {tier}] {r['model']}: {use_for}")
+    if not lines:
+        return "(none — run `lanista fetch` or no tier-1/2 notes present)"
     return "\n".join(lines)
 
 
@@ -165,16 +210,20 @@ def build_prompt(task: str, *, top_n: int = 3) -> str:
         f"TASK: {task}\n\n"
         f"{corpus_note}\n\n"
         f"CATALOG (top {len(rows)} by best available LMArena rating; "
-        f"price is $/Mtok input/output; lm_* columns are LMArena Elo ratings "
-        f"by category; '-' means no data):\n"
+        f"price is $/Mtok input/output; modalities uses txt/img/aud/vid/pdf; "
+        f"caps uses pdf/cu/fn/vis/think; tier is curated 1=frontier..4=local; "
+        f"lm_* columns are LMArena Elo ratings by category; '-' means no data):\n"
         f"{_format_catalog_table(rows)}\n\n"
+        f"TIER 1/2 USE-CASE NOTES (curated — cite via `tier` + model id):\n"
+        f"{_format_tier_notes(rows)}\n\n"
         f"RECENT PRACTITIONER OPINIONS (cite by [ID]):\n"
         f"{_format_opinions(opinions)}\n\n"
         "INSTRUCTIONS:\n"
         f"- Pick top {top_n} models for the TASK.\n"
         "- For each pick, write 2-3 sentences of justification.\n"
         "- Every claim must cite either:\n"
-        "    (a) a CATALOG column name in backticks (e.g. `lm_coding`, `aider`, `ctx`), OR\n"
+        "    (a) a CATALOG column name in backticks (e.g. `lm_coding`, `aider`, `ctx`, "
+        "`modalities`, `caps`, `tier`), OR\n"
         "    (b) an OPINION [ID] that literally appears in the list above.\n"
         "- If no opinion in the corpus is relevant to a pick, end that pick's "
         "justification with the literal token [no-opinion-match].\n"

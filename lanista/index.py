@@ -47,6 +47,9 @@ _ROLLUP_FIELDS = (
     "modalities",
     "capabilities",
     "tokenizer",
+    "speed_tokens_per_sec",
+    "ttft_sec",
+    "quality_index",
 )
 
 

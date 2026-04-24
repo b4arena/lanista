@@ -140,7 +140,17 @@ def test_gkisokay_seed_parses_and_has_tiers():
         assert entry.get("tier") in {1, 2, 3, 4}, f"{mid} has invalid tier"
 
 
-def test_aa_seed_is_empty_placeholder():
+def test_aa_seed_entries_carry_known_numeric_fields():
+    """Every AA seed entry must carry at least one field the rollup recognizes.
+
+    The seed is hand-populated; this guards against typos and keeps the schema
+    honest as coverage grows.
+    """
     ref = resources.files("lanista.data") / "artificial_analysis.seed.json"
     data = json.loads(ref.read_text(encoding="utf-8"))
-    assert data.get("models") == {}
+    models = data.get("models") or {}
+    assert isinstance(models, dict)
+    known = {"speed_tokens_per_sec", "ttft_sec", "quality_index"}
+    for mid, entry in models.items():
+        assert isinstance(entry, dict), mid
+        assert known & set(entry.keys()), f"{mid} has no known numeric field"

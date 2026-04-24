@@ -1,6 +1,42 @@
 {
-  "_schema": "Manual-drop slot for Artificial Analysis benchmarks. Populate 'models' with entries you copy from https://artificialanalysis.ai.",
-  "_updated": "2026-04-23",
-  "_source": "artificialanalysis.ai (manual transcription)",
-  "models": {}
+  "_schema": "Manual-drop slot for Artificial Analysis benchmarks. Populate 'models' with entries copied from https://artificialanalysis.ai. Recognized numeric fields rolled up into the index: 'speed_tokens_per_sec', 'ttft_sec', 'quality_index'. Any extra fields land in observations[].raw as-is and are available to agents reading the raw source file.",
+  "_example": {
+    "claude-opus-4-7": {
+      "speed_tokens_per_sec": 60.0,
+      "ttft_sec": 1.2,
+      "quality_index": 70.0
+    }
+  },
+  "_updated": "2026-04-24",
+  "_source": "artificialanalysis.ai (partial WebFetch extraction 2026-04-24; AA's full table is JS-rendered — hand-edit this file for complete coverage)",
+  "_coverage_note": "AA's interactive dashboard is not scrapeable; the entries below are only the superlative-callouts visible in the static HTML. Open https://artificialanalysis.ai/models in a browser and append rows to grow coverage.",
+  "models": {
+    "claude-opus-4-7": {
+      "quality_index": 57.0
+    },
+    "gemini-3-1-pro": {
+      "quality_index": 57.0
+    },
+    "gpt-5-5": {
+      "quality_index": 60.0
+    },
+    "mercury-2": {
+      "speed_tokens_per_sec": 717.1
+    },
+    "granite-4-0-h-small": {
+      "speed_tokens_per_sec": 430.5
+    },
+    "granite-3-3-8b": {
+      "speed_tokens_per_sec": 356.2
+    },
+    "ministral-3-3b": {
+      "ttft_sec": 0.45
+    },
+    "qwen3-5-2b": {
+      "ttft_sec": 0.49
+    },
+    "lfm2-24b-a2b": {
+      "ttft_sec": 0.50
+    }
+  }
 }
