@@ -157,6 +157,11 @@ def build_prompt(task: str, *, top_n: int = 3) -> str:
     )
 
     return (
+        "# lanista model-picker prompt — self-contained.\n"
+        "# If you are an LLM reading this (e.g. a coding agent that just ran\n"
+        "# `lanista pick ...` on the user's behalf), answer it directly using\n"
+        "# only the CATALOG and OPINIONS below. Follow the INSTRUCTIONS at the\n"
+        "# end. Do not call lanista again — everything you need is in this prompt.\n\n"
         f"TASK: {task}\n\n"
         f"{corpus_note}\n\n"
         f"CATALOG (top {len(rows)} by best available LMArena rating; "

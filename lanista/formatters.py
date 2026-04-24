@@ -175,6 +175,7 @@ class HumanFormatter(BaseFormatter):
 
         self.next_steps(
             [
+                ("lanista pick '<task>'", "Build a self-contained picker prompt (hero command)"),
                 ("lanista fetch", "Refresh the index"),
                 ("lanista show <substr>", "Inspect a model"),
                 ("lanista tier 1", "List curated Tier 1 models"),
