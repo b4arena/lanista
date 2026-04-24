@@ -27,7 +27,7 @@ Optional: set `HF_TOKEN` (free at [huggingface.co/settings/tokens](https://huggi
 
 ## See it in action
 
-A full walkthrough — every command executed live, every output real — lives in [`docs/lanista-demo.md`](docs/lanista-demo.md). It was built with [`showboat`](https://github.com/hildjj/showboat) so you can verify the outputs still match current reality:
+A full walkthrough — every command executed live, every output real — lives in [`docs/lanista-demo.md`](docs/lanista-demo.md). It was built with [`showboat`](https://github.com/simonw/showboat) so you can verify the outputs still match current reality:
 
 ```bash
 showboat verify docs/lanista-demo.md
