@@ -1,51 +1,46 @@
 {
   "_schema": "Hand-curated notes. Tier 1=frontier, 4=local/free.",
+  "_source": "Gkisokay LLM Model Stack",
+  "_source_url": "https://x.com/gkisokay",
+  "_chart_date": "2026-04-17",
+  "_chart_image": "sources/gkisokay/2026-04-17.jpeg",
+  "_extraction_instructions": "sources/gkisokay/README.md",
+  "_extracted_with": "hand-curated 2026-04-23; verified against 2026-04-17 chart via vision re-extraction",
   "_updated": "2026-04-23",
-  "_source": "Gkisokay LLM Model Stack (April 2026)",
   "models": {
-    "claude-opus-4-6": {
-      "tier": 1,
-      "strengths": [
-        "#1 agentic terminal coding via Claude Code",
-        "Adaptive thinking, agent teams, context compaction",
-        "76% long-ctx retrieval @ 1M"
-      ],
-      "weaknesses": [
-        "Community reports inconsistency lately",
-        "External dev only - not in internal agent runtimes"
-      ],
-      "use_for": "Complex external dev via Claude Code, multi-file refactoring"
-    },
     "claude-opus-4-7": {
       "tier": 1,
       "strengths": [
-        "Latest Opus",
-        "1M context",
-        "128K output"
+        "#1 SWE-Verified (87.6%) + SWE-Pro",
+        "3.75MP vision (3x Opus 4.6)",
+        "1M context, 128K output",
+        "Adaptive thinking, multi-agent coordination"
       ],
       "weaknesses": [
-        "Premium pricing"
+        "Premium pricing ($5 in / $25 out)",
+        "API only - no subscription for agents"
       ],
-      "use_for": "Successor to 4.6; use when 4.6 inconsistency bites"
+      "use_for": "Complex external dev via Claude Code, multi-file refactoring, vision-heavy agentic workflows"
     },
-    "gpt-5.4": {
+    "gpt-5-4": {
       "tier": 1,
       "strengths": [
         "Superhuman computer use (OSWorld 75%)",
         "Real multi-hour planning",
-        "Steerable planner + judge in Codex"
+        "Steerable planner + judge in Codex",
+        "Absorbs GPT-5.3 Codex + dynamic MCP tool search"
       ],
       "weaknesses": [
         "$100/month plan for best access"
       ],
-      "use_for": "External Codex-driven complex features"
+      "use_for": "External Codex-driven complex features, terminal-heavy workflows"
     },
-    "glm-5.1": {
+    "glm-5-1": {
       "tier": 1,
       "strengths": [
         "#1 SWE-Pro globally",
         "8-hour autonomous execution",
-        "MIT license, open weights",
+        "MIT license, open weights, self-hostable",
         "3x cheaper than Opus on input"
       ],
       "weaknesses": [
@@ -53,18 +48,32 @@
       ],
       "use_for": "Long-horizon agentic coding, sustained optimization loops"
     },
-    "minimax-m2.7": {
+    "minimax-m2-7": {
       "tier": 2,
       "strengths": [
         "97% skill adherence on 40+ skills",
-        "Multi-agent teams"
+        "Multi-agent teams",
+        "Self-evolving (100x RL cycles)"
       ],
       "weaknesses": [
         "API only - not open weights"
       ],
       "use_for": "OpenClaw execution backbone, high-volume agent tasks"
     },
-    "kimi-k2.5": {
+    "mimo-v2-pro": {
+      "tier": 2,
+      "strengths": [
+        "Deeply optimized for OpenClaw (best Terminal-Bench in tier)",
+        "Hybrid 7:1 attention + MTP fast generation",
+        "1M context, 6-7x cheaper than Opus 4.7"
+      ],
+      "weaknesses": [
+        "Text-only - no multimodal",
+        "Proprietary API only"
+      ],
+      "use_for": "Agent orchestration brain, custom OpenClaw workflows, long-context agent sessions"
+    },
+    "kimi-k2-5": {
       "tier": 2,
       "strengths": [
         "Long-horizon stability",
@@ -76,21 +85,12 @@
       ],
       "use_for": "Long-horizon task chains, multi-source browsing"
     },
-    "grok-4.20": {
-      "tier": 2,
-      "strengths": [
-        "Lowest hallucination rate on market",
-        "Native multi-agent API (4-16 parallel)",
-        "2M context window, 199 t/s"
-      ],
-      "weaknesses": [],
-      "use_for": "Hallucination-sensitive pipelines, long-context research"
-    },
-    "deepseek-v3.2": {
+    "deepseek-v3-2": {
       "tier": 2,
       "strengths": [
         "90% of GPT-5.4 performance at 1/50th cost",
-        "Open weights, MIT license"
+        "Open weights, MIT license",
+        "DSA sparse attention - 3x faster long context"
       ],
       "weaknesses": [],
       "use_for": "Cost-floor frontier reasoning, high-volume coding"
@@ -107,7 +107,7 @@
       ],
       "use_for": "Daily coding, content automation, Anthropic-ecosystem agents"
     },
-    "gpt-5.4-mini": {
+    "gpt-5-4-mini": {
       "tier": 3,
       "strengths": [
         "93.4% tool-call reliability",
@@ -117,7 +117,19 @@
       "weaknesses": [],
       "use_for": "Hermes conscious layer, 6-9 turn debates"
     },
-    "gemini-3.1-pro": {
+    "grok-4-20": {
+      "tier": 3,
+      "strengths": [
+        "Lowest hallucination rate on market",
+        "Native multi-agent API (4-16 parallel)",
+        "2M context window, 199 t/s"
+      ],
+      "weaknesses": [
+        "Reliability pick, not cheapest"
+      ],
+      "use_for": "Hallucination-sensitive pipelines, long-context research"
+    },
+    "gemini-3-1-pro": {
       "tier": 3,
       "strengths": [
         "Native video+audio in one API call",
@@ -129,7 +141,7 @@
       ],
       "use_for": "Multimodal agents, doc-heavy pipelines"
     },
-    "qwen3.6-plus": {
+    "qwen3-6-plus": {
       "tier": 3,
       "strengths": [
         "FREE via OpenRouter",
@@ -161,7 +173,7 @@
       "weaknesses": [],
       "use_for": "Budget-conscious agents, one-model-replacing-three"
     },
-    "qwen3.5-9b": {
+    "qwen3-5-9b": {
       "tier": 4,
       "strengths": [
         "Runs on 16GB RAM",
@@ -172,7 +184,7 @@
       "weaknesses": [],
       "use_for": "Always-on ideation loop, curation pass"
     },
-    "qwen3.5-27b": {
+    "qwen3-5-27b": {
       "tier": 4,
       "strengths": [
         "32GB RAM local",
@@ -205,7 +217,7 @@
       ],
       "use_for": "Reasoning-heavy micro tasks, math/logic classification"
     },
-    "glm-4.5-air": {
+    "glm-4-5-air": {
       "tier": 4,
       "strengths": [
         "Purpose-built for agent tool use + web browsing",
