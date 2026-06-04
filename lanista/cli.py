@@ -16,6 +16,7 @@ from dataclasses import dataclass
 
 import typer
 
+from lanista import columns as cols
 from lanista import doctor as dctr
 from lanista import index as idx
 from lanista import opinions as ops
@@ -571,6 +572,57 @@ def chart(
         )
         raise typer.Exit(1) from e
     print(res.stdout.strip() or out)
+
+
+@app.command()
+def columns(ctx: typer.Context) -> None:
+    """Glossary of catalog columns: lm_*, caps, modalities.
+
+    Output is generated from ``lanista.columns`` — the same dicts the
+    picker prompt and Pareto CLI consume, so the glossary can't drift
+    from what other commands actually accept.
+    """
+    _state(ctx)  # surface --json mode if requested in the future
+
+    def _table(title: str, header: tuple[str, str, str], rows: list[tuple[str, str, str]]) -> None:
+        widths = [
+            max(len(header[i]), *(len(r[i]) for r in rows))
+            for i in range(3)
+        ]
+        print(title)
+        print(
+            "  " + "  ".join(header[i].ljust(widths[i]) for i in range(3))
+        )
+        print(
+            "  " + "  ".join("-" * widths[i] for i in range(3))
+        )
+        for r in rows:
+            print(
+                "  " + "  ".join(r[i].ljust(widths[i]) for i in range(3))
+            )
+        print()
+
+    _table(
+        "LMArena Elo categories (column → source key → meaning):",
+        ("column", "lmarena_key", "description"),
+        [(c, k, d) for c, (k, d) in cols.LM_CATEGORIES.items()],
+    )
+    _table(
+        "Capability flags (short → canonical → meaning):",
+        ("short", "capability", "description"),
+        [(s, n, d) for s, (n, d) in cols.CAPS.items()],
+    )
+    _table(
+        "Modalities (short → canonical → meaning):",
+        ("short", "modality", "description"),
+        [(s, n, d) for s, (n, d) in cols.MODALITIES.items()],
+    )
+    print(
+        "Notes:\n"
+        "  - lm_* values are Elo ratings (relative, not %). ~1500 is current frontier; 30-50 pt gaps are meaningful, sub-10 is noise.\n"
+        "  - `tier` is curated: 1=frontier, 2=workhorse, 3=practical, 4=local-only.\n"
+        "  - `aider` is the Aider polyglot `best_pass_rate_2` percentage."
+    )
 
 
 @app.command(name="refresh-opinions")

@@ -7,6 +7,7 @@ Supporting documentation for lanista. Each file was generated with [`showboat`](
 | File | What it covers |
 |---|---|
 | [lanista-demo.md](lanista-demo.md) | Full walkthrough: `fetch`, `show`, `tier`, `agents`, `pick` — all commands with live output. The primary proof-of-work document. |
+| [columns.md](columns.md) | Glossary of `lm_*`, `caps`, and `modalities` columns — generated from `lanista.columns`, so it can't drift from what the commands accept. |
 | [workflows.md](workflows.md) | The three-lens story: when to use `pareto` vs `profiles` vs `pick`, what each misses, and how to combine them for the sharpest answers. |
 | [sweetspot-coding.md](sweetspot-coding.md) | Deterministic Pareto frontier for coding quality per dollar — `pareto` + `profiles` + chart, no LLM involved. |
 | [lanista-scenarios.md](lanista-scenarios.md) | Ten diverse task scenarios designed to exercise different catalog dimensions (cost, latency, Chinese Elo, vision, on-device, …). |
@@ -19,6 +20,7 @@ Supporting documentation for lanista. Each file was generated with [`showboat`](
 showboat verify docs/lanista-demo.md
 showboat verify docs/workflows.md
 showboat verify docs/sweetspot-coding.md
+showboat verify docs/columns.md
 ```
 
 LMArena ratings, HN stories, and blog feeds change daily. `verify` will flag drift in exactly the sections where upstream data has moved — that's a feature, not a bug.
