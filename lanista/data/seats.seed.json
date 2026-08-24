@@ -1,0 +1,55 @@
+{
+  "_schema": "Named seat allowlists: provider-facing pin ids a host/rig can start.",
+  "_updated": "2026-08-24",
+  "_note": "Pins keep the host spelling (dots ok). Matching uses lanista.aliases.normalize + soft suffix peel. Edit ~/.config/lanista/seats.json to customize; delete it to re-seed.",
+  "seats": {
+    "herdr-agents": {
+      "description": "Models startable via spellkave herdr-agents-collaboration (Pi github-copilot / xai / openai-codex + agy).",
+      "source": "spellkave .agents/skills/herdr-agents-collaboration (+ local ~/.pi/agent/models-store.json lanes)",
+      "models": [
+        {"provider": "github-copilot", "engine": "pi", "pin": "gpt-5.4-mini", "role": "daily"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "gemini-3.7-flash", "role": "thrifty-ctx"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "claude-haiku-4.5", "role": "thrifty-claude"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "kimi-k2.7-code", "role": "budget-code"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "mai-code-1.1-flash", "role": "max-thrift"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "gpt-5.6-luna", "role": "max-thrift"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "claude-sonnet-5", "role": "mid-claude"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "claude-sonnet-4.6", "role": "mid-claude"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "gpt-5.3-codex", "role": "heavy-code"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "gpt-5.6-terra", "role": "mid-agent"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "gpt-5.6-sol", "role": "hard-reasoning"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "gpt-5.4", "role": "mid-gpt"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "gpt-5.5", "role": "max-quality"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "claude-opus-4.6", "role": "max-quality"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "claude-opus-4.8", "role": "max-quality"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "claude-fable-5", "role": "max-quality"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "grok-4.5", "role": "grok"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "grok-4.6", "role": "grok"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "gemini-3.6-flash", "role": "flash"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "gemini-3.5-flash", "role": "flash"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "claude-opus-4.7", "role": "max-quality"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "claude-sonnet-4.5", "role": "mid-claude"},
+        {"provider": "github-copilot", "engine": "pi", "pin": "kimi-k3", "role": "budget-code"},
+
+        {"provider": "xai", "engine": "pi", "pin": "grok-4.6", "role": "frontier"},
+        {"provider": "xai", "engine": "pi", "pin": "grok-4.5", "role": "default"},
+        {"provider": "xai", "engine": "pi", "pin": "grok-4.3", "role": "thrifty"},
+        {"provider": "xai", "engine": "pi", "pin": "grok-build-0.1", "role": "coding-agent"},
+
+        {"provider": "openai-codex", "engine": "pi", "pin": "gpt-5.4-mini", "role": "daily"},
+        {"provider": "openai-codex", "engine": "pi", "pin": "gpt-5.4", "role": "mid"},
+        {"provider": "openai-codex", "engine": "pi", "pin": "gpt-5.5", "role": "max-quality"},
+        {"provider": "openai-codex", "engine": "pi", "pin": "gpt-5.6-sol", "role": "hard-reasoning"},
+        {"provider": "openai-codex", "engine": "pi", "pin": "gpt-5.6-terra", "role": "mid-agent"},
+        {"provider": "openai-codex", "engine": "pi", "pin": "gpt-5.6-luna", "role": "max-thrift"},
+        {"provider": "openai-codex", "engine": "pi", "pin": "gpt-5.3-codex-spark", "role": "code-spark"},
+
+        {"provider": "agy", "engine": "agy", "pin": "claude-sonnet-4-6", "role": "mid-claude"},
+        {"provider": "agy", "engine": "agy", "pin": "claude-opus-4-6-thinking", "role": "max-quality"},
+        {"provider": "agy", "engine": "agy", "pin": "gpt-oss-120b-medium", "role": "open-weights"},
+        {"provider": "agy", "engine": "agy", "pin": "gemini-3.7-flash-high", "role": "flash"},
+        {"provider": "agy", "engine": "agy", "pin": "gemini-3.7-flash", "role": "flash"}
+      ]
+    }
+  }
+}

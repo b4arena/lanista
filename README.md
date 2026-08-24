@@ -37,9 +37,24 @@ lanista refresh-opinions
 lanista pareto lm_coding price_input --max-cost 1
 lanista profiles lm_coding price_input
 
+# Seat allowlist (only models a host can start) — e.g. herdr-agents skill:
+lanista seats
+lanista seats herdr-agents
+lanista profiles lm_coding price_input --seat herdr-agents --provider github-copilot
+
 # LLM-synthesized pick with citations — paste output into any LLM:
 lanista pick "write architecture documents for a microservices migration"
 ```
+
+### Seats (startable-model allowlists)
+
+A **seat** is a named pool of provider-facing pin ids. `profiles` / `pareto` /
+`chart` accept `--seat` and optional `--provider` so recommendations stay inside
+what a rig can actually launch (no orphan Llama when you only have Copilot).
+
+- Shipped seed: `herdr-agents` (Pi `github-copilot` / `xai` / `openai-codex` + `agy`)
+- User copy: `~/.config/lanista/seats.json` (seeded on first use; edit freely)
+- Inspect resolution: `lanista seats herdr-agents`
 
 Optional: set `HF_TOKEN` (free at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)) to double your HuggingFace rate-limit budget.
 

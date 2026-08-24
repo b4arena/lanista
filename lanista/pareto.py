@@ -134,10 +134,13 @@ def filter_models(
     *,
     require_cap: str | None = None,
     min_ctx: int | None = None,
+    allow_ids: set[str] | None = None,
 ) -> dict:
-    """Drop models that don't satisfy a capability or context-window gate."""
+    """Drop models that don't satisfy capability, context, or allowlist gates."""
     out = {}
     for mid, entry in models.items():
+        if allow_ids is not None and mid not in allow_ids:
+            continue
         if require_cap:
             caps = entry.get("capabilities") or []
             if require_cap not in caps:

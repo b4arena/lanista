@@ -73,6 +73,12 @@ def test_filter_models_by_min_ctx():
     assert set(out.keys()) == {"a"}
 
 
+def test_filter_models_by_allow_ids():
+    models = {"a": {}, "b": {}, "c": {}}
+    out = pareto.filter_models(models, allow_ids={"a", "c"})
+    assert set(out.keys()) == {"a", "c"}
+
+
 def test_profiles_picks_three_anchors():
     # Frontier: A (cheapest, worst), C (mid), E (priciest, best).
     pairs = [
