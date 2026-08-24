@@ -6,6 +6,7 @@ Layout:
             gkisokay.json
             artificial_analysis.json    (optional, user-populated)
         aliases.json      # model-id canonicalization table
+        seats.json        # named seat allowlists (startable model pins)
 
     $XDG_CACHE_HOME/lanista/
         sources/          # auto-fetched source blobs (regenerable)
@@ -55,6 +56,10 @@ def sources_cache_dir() -> Path:
 
 def aliases_path() -> Path:
     return config_dir() / "aliases.json"
+
+
+def seats_path() -> Path:
+    return config_dir() / "seats.json"
 
 
 def index_path() -> Path:

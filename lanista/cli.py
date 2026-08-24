@@ -10,12 +10,11 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from dataclasses import dataclass
 
 import typer
-
-import subprocess
-import sys
 
 from lanista import doctor as dctr
 from lanista import index as idx
@@ -23,6 +22,7 @@ from lanista import opinions as ops
 from lanista import pareto as prt
 from lanista import picker as pkr
 from lanista import routing as rt
+from lanista import seats as seatlib
 from lanista.formatters import BaseFormatter, OutputMode, get_formatter
 from lanista.index import STALE_AFTER
 
@@ -200,6 +200,154 @@ def _resolve_axis(state: CLIState, name: str) -> str:
     raise typer.Exit(1)
 
 
+def _apply_seat(
+    state: CLIState,
+    models: dict,
+    seat_id: str | None,
+    provider: str | None,
+) -> tuple[dict, seatlib.SeatMatch | None]:
+    """Optionally restrict models to a named seat allowlist."""
+    if not seat_id:
+        if provider:
+            state.formatter.error(
+                "--provider requires --seat",
+                hints=[
+                    "Example: lanista profiles lm_coding price_input "
+                    "--seat herdr-agents --provider github-copilot"
+                ],
+            )
+            raise typer.Exit(1)
+        return models, None
+    seat = seatlib.get_seat(seat_id)
+    if seat is None:
+        known = ", ".join(seatlib.list_seat_ids()) or "(none — check seats.json)"
+        state.formatter.error(
+            f"unknown seat '{seat_id}'",
+            hints=[f"Known seats: {known}", "Run: lanista seats"],
+        )
+        raise typer.Exit(1)
+    match = seatlib.match_seat(models, seat, provider=provider)
+    if not match.models:
+        hints = [
+            f"Seat '{seat_id}' matched 0 catalog models",
+            "Run: lanista seats " + seat_id,
+            "Or:  lanista fetch",
+        ]
+        if provider:
+            hints.insert(1, f"Provider filter: {provider}")
+        state.formatter.error("empty seat match", hints=hints)
+        raise typer.Exit(1)
+    return match.models, match
+
+
+def _filter_bits(
+    *,
+    seat_id: str | None = None,
+    provider: str | None = None,
+    seat_match: seatlib.SeatMatch | None = None,
+    require_cap: str | None = None,
+    min_ctx: int | None = None,
+    max_cost: float | None = None,
+    min_quality: float | None = None,
+) -> list[str]:
+    bits: list[str] = []
+    if seat_id:
+        n_res = len(seat_match.resolved) if seat_match else 0
+        n_un = len(seat_match.unresolved) if seat_match else 0
+        bits.append(f"seat={seat_id} ({n_res} pins matched, {n_un} unresolved)")
+    if provider:
+        bits.append(f"provider={provider}")
+    if require_cap:
+        bits.append(f"require-cap={require_cap}")
+    if min_ctx:
+        bits.append(f"min-ctx={min_ctx}")
+    if max_cost is not None:
+        bits.append(f"max-cost={max_cost}")
+    if min_quality is not None:
+        bits.append(f"min-quality={min_quality}")
+    return bits
+
+
+def _pin_label(seat_match: seatlib.SeatMatch | None, index_id: str) -> str:
+    if not seat_match:
+        return index_id
+    rp = seat_match.pin_by_index.get(index_id)
+    return seatlib.format_pin(rp, index_id)
+
+
+@app.command()
+def seats(
+    ctx: typer.Context,
+    seat_id: str | None = typer.Argument(
+        None, help="Seat id to inspect (omit to list all)"
+    ),
+    provider: str | None = typer.Option(
+        None, "--provider", "-p", help="Only show pins for this provider lane"
+    ),
+) -> None:
+    """List seat allowlists, or show pin→catalog resolution for one seat."""
+    state = _state(ctx)
+    all_seats = seatlib.load_seats()
+    if not seat_id:
+        if not all_seats:
+            state.formatter.error(
+                "no seats configured",
+                hints=["Check ~/.config/lanista/seats.json"],
+            )
+            raise typer.Exit(1)
+        print(f"{len(all_seats)} seat(s):")
+        for sid, seat in sorted(all_seats.items()):
+            provs = sorted({p.provider for p in seat.pins})
+            desc = seat.description or "(no description)"
+            print(f"  {sid:<20}  {len(seat.pins):>3} pins  providers={','.join(provs)}")
+            print(f"  {'':20}  {desc}")
+        print()
+        print("Inspect: lanista seats herdr-agents")
+        print("Use:     lanista profiles lm_coding price_input --seat herdr-agents")
+        return
+
+    seat = all_seats.get(seat_id)
+    if seat is None:
+        state.formatter.error(
+            f"unknown seat '{seat_id}'",
+            hints=[f"Known: {', '.join(sorted(all_seats)) or '(none)'}"],
+        )
+        raise typer.Exit(1)
+
+    data = idx.load_index()
+    models = (data or {}).get("models") or {}
+    match = seatlib.match_seat(models, seat, provider=provider)
+
+    print(f"Seat: {seat.id}")
+    if seat.description:
+        print(f"  {seat.description}")
+    if seat.source:
+        print(f"  source: {seat.source}")
+    if provider:
+        print(f"  provider filter: {provider}")
+    print(
+        f"  pins: {len(seat.pins)} total · "
+        f"{len(match.resolved)} matched · {len(match.unresolved)} unresolved · "
+        f"{len(match.models)} unique catalog ids"
+    )
+    print()
+    if match.resolved:
+        print("Matched:")
+        for rp in match.resolved:
+            role = f"  role={rp.pin.role}" if rp.pin.role else ""
+            print(
+                f"  {rp.pin.provider}/{rp.pin.pin:<28} -> {rp.index_id}{role}"
+            )
+    if match.unresolved:
+        print()
+        print("Unresolved (not in catalog):")
+        for sp in match.unresolved:
+            print(f"  {sp.provider}/{sp.pin}")
+    if data is None:
+        print()
+        print("Note: no index yet — run lanista fetch to resolve pins against the catalog.")
+
+
 @app.command()
 def pareto(
     ctx: typer.Context,
@@ -216,13 +364,21 @@ def pareto(
         None, "--min-ctx", help="Only include models with context_window >= this"
     ),
     limit: int | None = typer.Option(None, "--limit", "-n", help="Cap frontier rows in output"),
+    seat: str | None = typer.Option(
+        None, "--seat", help="Restrict to a named seat allowlist (e.g. herdr-agents)"
+    ),
+    provider: str | None = typer.Option(
+        None, "--provider", "-p",
+        help="Within --seat, only this provider lane (github-copilot, xai, openai-codex, agy)",
+    ),
 ) -> None:
     """Deterministic Pareto frontier over QUALITY vs COST."""
     state = _state(ctx)
     data = _require_index(state)
     q = _resolve_axis(state, quality)
     c = _resolve_axis(state, cost)
-    models = prt.filter_models(data["models"], require_cap=require_cap, min_ctx=min_ctx)
+    models, seat_match = _apply_seat(state, data["models"], seat, provider)
+    models = prt.filter_models(models, require_cap=require_cap, min_ctx=min_ctx)
     pairs = prt.extract_pairs(models, q, c)
     if max_cost is not None:
         pairs = [p for p in pairs if p[2] <= max_cost]
@@ -242,13 +398,21 @@ def pareto(
     if not front:
         state.formatter.error(
             "empty frontier",
-            hints=["Try different axes", "Or widen --max-cost"],
+            hints=["Try different axes", "Or widen --max-cost", "Or drop --seat / --provider"],
         )
         raise typer.Exit(1)
     print(f"Pareto frontier ({q} ↑ vs {c} ↓) — {len(front)} model(s):")
-    print(f"  {'model':<40}  {q:>14}  {c:>14}")
+    filt = _filter_bits(
+        seat_id=seat, provider=provider, seat_match=seat_match,
+        require_cap=require_cap, min_ctx=min_ctx, max_cost=max_cost, min_quality=min_quality,
+    )
+    if filt:
+        print("Filters: " + ", ".join(filt))
+    label = "pin" if seat_match else "model"
+    print(f"  {label:<48}  {q:>14}  {c:>14}")
     for mid, qv, cv in front:
-        print(f"  {mid[:40]:<40}  {qv:>14.2f}  {cv:>14.4f}")
+        shown = _pin_label(seat_match, mid)[:48]
+        print(f"  {shown:<48}  {qv:>14.2f}  {cv:>14.4f}")
     print()
     print("Next: lanista chart " + f"{q} {c} --out /tmp/pareto.png")
 
@@ -267,13 +431,21 @@ def profiles(
     min_ctx: int | None = typer.Option(
         None, "--min-ctx", help="Only include models with context_window >= this"
     ),
+    seat: str | None = typer.Option(
+        None, "--seat", help="Restrict to a named seat allowlist (e.g. herdr-agents)"
+    ),
+    provider: str | None = typer.Option(
+        None, "--provider", "-p",
+        help="Within --seat, only this provider lane (github-copilot, xai, openai-codex, agy)",
+    ),
 ) -> None:
     """Three anchor picks on the QUALITY×COST frontier: flagship / balanced / budget."""
     state = _state(ctx)
     data = _require_index(state)
     q = _resolve_axis(state, quality)
     c = _resolve_axis(state, cost)
-    models = prt.filter_models(data["models"], require_cap=require_cap, min_ctx=min_ctx)
+    models, seat_match = _apply_seat(state, data["models"], seat, provider)
+    models = prt.filter_models(models, require_cap=require_cap, min_ctx=min_ctx)
     pairs = prt.extract_pairs(models, q, c)
     if max_cost is not None:
         pairs = [p for p in pairs if p[2] <= max_cost]
@@ -284,38 +456,46 @@ def profiles(
     if not picks["flagship"]:
         state.formatter.error(
             "empty frontier after filters",
-            hints=["Widen --max-cost / --min-ctx", "Drop --require-cap", "Try: lanista pareto " + f"{q} {c}"],
+            hints=[
+                "Widen --max-cost / --min-ctx",
+                "Drop --require-cap / --seat / --provider",
+                "Try: lanista pareto " + f"{q} {c}",
+                "Or:  lanista seats " + (seat or "herdr-agents"),
+            ],
         )
         raise typer.Exit(1)
 
     def _fmt(label: str, note: str, pick):
         mid, qv, cv = pick
-        print(f"{label:<10}  {mid[:42]:<42}  {q}={qv:.2f}  {c}={cv:.4f}")
+        shown = _pin_label(seat_match, mid)
+        print(f"{label:<10}  {shown[:42]:<42}  {q}={qv:.2f}  {c}={cv:.4f}")
         if note:
             print(f"            {note}")
+        if seat_match:
+            rp = seat_match.pin_by_index.get(mid)
+            if rp and rp.pin.engine:
+                print(f"            engine={rp.pin.engine}  catalog={mid}")
 
     frontier_ct = len(frontier_ids)
     print(f"Frontier has {frontier_ct} non-dominated model(s) over {len(pairs)} candidate(s).")
-    filt_bits = []
-    if require_cap:
-        filt_bits.append(f"require-cap={require_cap}")
-    if min_ctx:
-        filt_bits.append(f"min-ctx={min_ctx}")
-    if max_cost is not None:
-        filt_bits.append(f"max-cost={max_cost}")
-    if min_quality is not None:
-        filt_bits.append(f"min-quality={min_quality}")
+    filt_bits = _filter_bits(
+        seat_id=seat, provider=provider, seat_match=seat_match,
+        require_cap=require_cap, min_ctx=min_ctx, max_cost=max_cost, min_quality=min_quality,
+    )
     if filt_bits:
         print("Filters: " + ", ".join(filt_bits))
     print()
     _fmt("Flagship", f"max {q} on the frontier", picks["flagship"])
-    _fmt("Balanced", f"knee of the curve (normalized distance to ideal)", picks["balanced"])
+    _fmt("Balanced", "knee of the curve (normalized distance to ideal)", picks["balanced"])
     _fmt("Budget", f"min {c} on the frontier", picks["budget"])
     if picks["flagship"] == picks["balanced"] == picks["budget"]:
         print()
         print("Note: only one frontier point survived the filters; all three profiles collapse.")
     print()
-    print(f"Chart: lanista chart {q} {c} --out /tmp/profiles.png")
+    chart_extra = f" --seat {seat}" if seat else ""
+    if provider:
+        chart_extra += f" --provider {provider}"
+    print(f"Chart: lanista chart {q} {c}{chart_extra} --out /tmp/profiles.png")
 
 
 @app.command()
@@ -334,13 +514,21 @@ def chart(
     min_ctx: int | None = typer.Option(
         None, "--min-ctx", help="Only include models with context_window >= this"
     ),
+    seat: str | None = typer.Option(
+        None, "--seat", help="Restrict to a named seat allowlist (e.g. herdr-agents)"
+    ),
+    provider: str | None = typer.Option(
+        None, "--provider", "-p",
+        help="Within --seat, only this provider lane",
+    ),
 ) -> None:
     """Render a scatter plot of QUALITY vs COST with the frontier highlighted."""
     state = _state(ctx)
     data = _require_index(state)
     q = _resolve_axis(state, quality)
     c = _resolve_axis(state, cost)
-    models = prt.filter_models(data["models"], require_cap=require_cap, min_ctx=min_ctx)
+    models, _seat_match = _apply_seat(state, data["models"], seat, provider)
+    models = prt.filter_models(models, require_cap=require_cap, min_ctx=min_ctx)
     pairs = prt.extract_pairs(models, q, c)
     if max_cost is not None:
         pairs = [p for p in pairs if p[2] <= max_cost]
