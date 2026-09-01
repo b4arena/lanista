@@ -14,7 +14,7 @@ from importlib import resources
 from typing import Literal
 
 from lanista import paths
-from lanista.http import fetch_text
+from lanista.http import aa_headers, fetch_text
 from lanista.sources import SOURCES, pimono
 from lanista.sources.litellm import URL as LITELLM_URL
 from lanista.sources.openrouter import URL as OPENROUTER_URL
@@ -129,6 +129,29 @@ def _check_aliases() -> Check:
         )
     count = len(data.get("aliases") or {})
     return Check(name="aliases", status="ok", message=f"{count} canonical ids: {p}")
+
+
+def _check_api_keys() -> Check:
+    """Artificial Analysis is the one source that hard-fails without a key.
+
+    HF_TOKEN only widens a rate limit, so its absence is not worth a check.
+    AA returns 401 with no key, silently costing 600+ models from the index.
+    """
+    if aa_headers():
+        return Check(
+            name="api key (artificial_analysis)",
+            status="ok",
+            message="ARTIFICIAL_ANALYSIS_KEY is set",
+        )
+    return Check(
+        name="api key (artificial_analysis)",
+        status="warn",
+        message="ARTIFICIAL_ANALYSIS_KEY not set — source will be skipped on fetch",
+        fix_hint=(
+            "get a free key at https://artificialanalysis.ai/insights "
+            "and export ARTIFICIAL_ANALYSIS_KEY"
+        ),
+    )
 
 
 def _check_index() -> tuple[Check, dict | None]:
@@ -261,6 +284,7 @@ def run_checks(verbose: bool = False) -> list[Check]:
     checks: list[Check] = []
     checks.extend(_check_curated_sources())
     checks.append(_check_aliases())
+    checks.append(_check_api_keys())
     idx_check, idx_data = _check_index()
     checks.append(idx_check)
     age_check = _check_index_age(idx_data)

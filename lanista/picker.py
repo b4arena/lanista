@@ -10,9 +10,9 @@ that lack supporting opinion with ``[no-opinion-match]``.
 
 from __future__ import annotations
 
+from lanista import columns as cols
 from lanista import index as idx
 from lanista.columns import CAP_SHORT as _CAP_SHORT
-from lanista.columns import LM_CATEGORIES
 from lanista.columns import MODALITY_SHORT as _MODALITY_SHORT
 from lanista.opinions import cache as ocache
 from lanista.opinions.base import OpinionEntry
@@ -41,11 +41,6 @@ def _obs_extracted(obs_list: list[dict], source: str) -> dict:
         if o.get("source") == source:
             return o.get("extracted") or {}
     return {}
-
-
-def _lm_rating(ratings: dict, key: str):
-    entry = (ratings or {}).get(key) or {}
-    return entry.get("rating")
 
 
 def _aider_pass(obs_list: list[dict]):
@@ -77,11 +72,31 @@ def _aider_cell(v) -> str:
     return f"{v:.0f}%"
 
 
+def _bench_value(obs: list[dict], source: str, key: str):
+    """One benchmark number, whichever of the two source shapes it lives in."""
+    ext = _obs_extracted(obs, source)
+    if source == "lmarena":
+        return ((ext.get("lmarena_ratings") or {}).get(key) or {}).get("rating")
+    return (ext.get("aa_evaluations") or {}).get(key)
+
+
+def _bench_cell(alias: str, v) -> str:
+    """Render a benchmark value on its own scale (see columns.SCALES)."""
+    if v is None:
+        return "-"
+    scale = cols.SCALES.get(alias, "elo")
+    if scale == "rate":
+        return f"{v * 100:.0f}%"
+    if scale == "score":
+        return f"{v:+.3f}"
+    return f"{v:.0f}"
+
+
 def _build_rows(models: dict) -> list[dict]:
     rows: list[dict] = []
+    bench = cols.benchmark_columns()
     for mid, entry in models.items():
         obs = entry.get("observations") or []
-        lm = _obs_extracted(obs, "lmarena").get("lmarena_ratings") or {}
         notes = entry.get("notes") or {}
         rows.append(
             {
@@ -93,7 +108,7 @@ def _build_rows(models: dict) -> list[dict]:
                 "tier": notes.get("tier") if notes.get("tier") is not None else None,
                 "use_for": notes.get("use_for"),
                 "aider": _aider_pass(obs),
-                **{alias: _lm_rating(lm, key) for alias, (key, _) in LM_CATEGORIES.items()},
+                **{alias: _bench_value(obs, bench[alias][0], bench[alias][1]) for alias in bench},
             }
         )
 
@@ -108,51 +123,26 @@ def _build_rows(models: dict) -> list[dict]:
 
 
 def _format_catalog_table(rows: list[dict]) -> str:
-    headers = [
-        "model",
-        "price_$/Mtok",
-        "ctx",
-        "aider",
-        "modalities",
-        "caps",
-        "tier",
-        "lm_overall",
-        "lm_coding",
-        "lm_writing",
-        "lm_hard",
-        "lm_long",
-        "lm_english",
-        "lm_chinese",
-        "lm_document",
-    ]
+    # Headers and cells both come from columns.PICKER_COLUMNS. Listing them
+    # twice by hand is how the table and the glossary drift apart.
+    fixed = ["model", "price_$/Mtok", "ctx", "aider", "modalities", "caps", "tier"]
+    headers = [*fixed, *cols.PICKER_COLUMNS]
     lines = [
         "| " + " | ".join(headers) + " |",
         "|" + "|".join(["---"] * len(headers)) + "|",
     ]
     for r in rows:
-        lines.append(
-            "| "
-            + " | ".join(
-                [
-                    r["model"][:48],
-                    r["price"],
-                    _cell(r["ctx"]),
-                    _aider_cell(r["aider"]),
-                    r["modalities"],
-                    r["caps"],
-                    _cell(r["tier"]),
-                    _cell(r["lm_overall"]),
-                    _cell(r["lm_coding"]),
-                    _cell(r["lm_writing"]),
-                    _cell(r["lm_hard"]),
-                    _cell(r["lm_long"]),
-                    _cell(r["lm_english"]),
-                    _cell(r["lm_chinese"]),
-                    _cell(r["lm_document"]),
-                ]
-            )
-            + " |"
-        )
+        cells = [
+            r["model"][:48],
+            r["price"],
+            _cell(r["ctx"]),
+            _aider_cell(r["aider"]),
+            r["modalities"],
+            r["caps"],
+            _cell(r["tier"]),
+            *(_bench_cell(alias, r.get(alias)) for alias in cols.PICKER_COLUMNS),
+        ]
+        lines.append("| " + " | ".join(cells) + " |")
     return "\n".join(lines)
 
 

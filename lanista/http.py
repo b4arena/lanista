@@ -31,6 +31,19 @@ def hf_headers() -> dict:
     return {"Authorization": f"Bearer {token}"} if token else {}
 
 
+def aa_headers() -> dict:
+    """``x-api-key`` header from ``ARTIFICIAL_ANALYSIS_KEY``, else empty.
+
+    Artificial Analysis' free API rejects unauthenticated requests with 401.
+    Keys are free from the Insights Platform and rate-limited to 1000
+    requests/day, so the token is required rather than merely helpful.
+    """
+    token = os.environ.get("ARTIFICIAL_ANALYSIS_KEY") or os.environ.get(
+        "ARTIFICIAL_ANALYSIS_API_KEY"
+    )
+    return {"x-api-key": token} if token else {}
+
+
 def fetch_json(url: str, timeout: int = 20, headers: dict | None = None) -> dict | None:
     """GET a JSON URL. Return parsed value, or None on failure (reason to stderr)."""
     try:

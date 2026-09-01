@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from lanista.columns import LM_CATEGORIES
+from lanista.columns import AA_EVALS, LM_AGENT, LM_CATEGORIES
 
 
 def _ext(entry: dict, source: str) -> dict:
@@ -27,6 +27,14 @@ def _ext(entry: dict, source: str) -> dict:
 def _lm(entry: dict, key: str):
     r = (_ext(entry, "lmarena").get("lmarena_ratings") or {}).get(key) or {}
     return r.get("rating")
+
+
+def _aa(entry: dict, key: str):
+    return (_ext(entry, "artificial_analysis").get("aa_evaluations") or {}).get(key)
+
+
+def _aa_accessor(key: str) -> Callable[[dict], float | None]:
+    return lambda e: _aa(e, key)
 
 
 def _aider(entry: dict):
@@ -82,6 +90,10 @@ COLUMN_ACCESSORS: dict[str, Callable[[dict], float | None]] = {
     # quality axes — pulled from columns.LM_CATEGORIES so the column
     # set never drifts from the picker prompt / docs page.
     **{alias: _lm_accessor(key) for alias, (key, _) in LM_CATEGORIES.items()},
+    # Agent leaderboard — same accessor, different scale (see columns.LM_AGENT).
+    **{alias: _lm_accessor(key) for alias, (key, _) in LM_AGENT.items()},
+    # Artificial Analysis' own evaluations.
+    **{alias: _aa_accessor(key) for alias, (key, _) in AA_EVALS.items()},
     "aider": _aider,
     "quality_index": _quality_index,
     "speed_tokens_per_sec": _speed,
