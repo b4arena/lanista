@@ -53,7 +53,4 @@ def suggest_alternative(task: str) -> str | None:
             "Tip: this looks like a trade-off with multiple acceptable answers. "
             "Try: lanista profiles lm_coding price_input"
         )
-    return (
-        "Tip: this looks like a numeric trade-off. "
-        "Try: lanista pareto lm_coding price_input"
-    )
+    return "Tip: this looks like a numeric trade-off. Try: lanista pareto lm_coding price_input"

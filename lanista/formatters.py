@@ -170,9 +170,7 @@ class HumanFormatter(BaseFormatter):
             self.out.print(f"  Curated:   {tiers}")
         counts = data.get("source_counts") or {}
         if counts:
-            self.out.print(
-                "  Sources:   " + ", ".join(f"{n}={c}" for n, c in counts.items())
-            )
+            self.out.print("  Sources:   " + ", ".join(f"{n}={c}" for n, c in counts.items()))
         self.out.print(f"  Index:     {paths.index_path()}")
         self.out.print(f"  Sources:   {paths.sources_config_dir()}")
 
@@ -193,13 +191,10 @@ class HumanFormatter(BaseFormatter):
             err = report.source_errors.get(name)
             if err:
                 self.out.print(
-                    f"[red]![/red] {name.ljust(name_width)}  "
-                    f"[dim]{count} models ({err})[/dim]"
+                    f"[red]![/red] {name.ljust(name_width)}  [dim]{count} models ({err})[/dim]"
                 )
             else:
-                self.out.print(
-                    f"[green]+[/green] {name.ljust(name_width)}  {count} models"
-                )
+                self.out.print(f"[green]+[/green] {name.ljust(name_width)}  {count} models")
         for name, err in report.source_errors.items():
             if name in report.source_counts:
                 continue
@@ -231,9 +226,7 @@ class HumanFormatter(BaseFormatter):
         for o in obs:
             src = o.get("source", "?").ljust(src_width)
             src_id = o.get("source_model_id", "?")
-            self.out.print(
-                f"    [dim]\\[[/dim][cyan]{src}[/cyan][dim]][/dim] [dim]{src_id}[/dim]"
-            )
+            self.out.print(f"    [dim]\\[[/dim][cyan]{src}[/cyan][dim]][/dim] [dim]{src_id}[/dim]")
             facts = _format_observation_facts(o.get("source", ""), o.get("extracted") or {})
             self.out.print(f"        {facts}")
 
@@ -254,9 +247,7 @@ class HumanFormatter(BaseFormatter):
             if notes:
                 self.out.print(f"  tier:      {notes.get('tier', '?')}  [dim]\\[gkisokay][/dim]")
                 if notes.get("use_for"):
-                    self.out.print(
-                        f"  use for:   {notes['use_for']}  [dim]\\[gkisokay][/dim]"
-                    )
+                    self.out.print(f"  use for:   {notes['use_for']}  [dim]\\[gkisokay][/dim]")
             if show_sources:
                 self._render_observations(rec.get("observations") or [], skip=None)
             self.out.print("")

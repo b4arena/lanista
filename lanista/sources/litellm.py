@@ -5,9 +5,7 @@ from __future__ import annotations
 from lanista import http
 from lanista.source_base import Source
 
-URL = (
-    "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
-)
+URL = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
 
 
 def fetch() -> dict | None:

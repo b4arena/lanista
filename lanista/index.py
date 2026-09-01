@@ -111,9 +111,7 @@ def run_fetch(info: InfoCallback | None = None) -> FetchReport:
     report = FetchReport()
     now_iso = datetime.now(UTC).isoformat()
 
-    resolver = aliases_mod.build_resolver(
-        aliases_mod.load_aliases().get("aliases", {})
-    )
+    resolver = aliases_mod.build_resolver(aliases_mod.load_aliases().get("aliases", {}))
 
     models: dict[str, dict] = {}
     pimono_raw: dict | None = None

@@ -59,8 +59,10 @@ OPINIONS = [
 
 
 def test_build_prompt_includes_task_catalog_table_and_citation_rules():
-    with patch("lanista.picker.idx.load_index", return_value=INDEX), \
-         patch("lanista.picker.ocache.load_all", return_value=OPINIONS):
+    with (
+        patch("lanista.picker.idx.load_index", return_value=INDEX),
+        patch("lanista.picker.ocache.load_all", return_value=OPINIONS),
+    ):
         prompt = picker.build_prompt("write architecture docs", top_n=2)
 
     assert "TASK: write architecture docs" in prompt
@@ -78,8 +80,10 @@ def test_build_prompt_includes_task_catalog_table_and_citation_rules():
 
 
 def test_build_prompt_flags_empty_opinion_corpus():
-    with patch("lanista.picker.idx.load_index", return_value=INDEX), \
-         patch("lanista.picker.ocache.load_all", return_value=[]):
+    with (
+        patch("lanista.picker.idx.load_index", return_value=INDEX),
+        patch("lanista.picker.ocache.load_all", return_value=[]),
+    ):
         prompt = picker.build_prompt("t")
     assert "Opinion corpus is EMPTY" in prompt
 

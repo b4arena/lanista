@@ -19,8 +19,7 @@ _RFC822 = re.compile(r"(\d{1,2})\s+(\w{3})\s+(\d{4})")
 _MONTHS = {
     m: f"{i + 1:02d}"
     for i, m in enumerate(
-        ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     )
 }
 
