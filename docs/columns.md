@@ -33,6 +33,93 @@ LMArena Elo categories
 │             │                  │ supplied material'.                         │
 └─────────────┴──────────────────┴─────────────────────────────────────────────┘
 
+LMArena agent leaderboard                                                       
+┏━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+┃ column             ┃ lmarena_key                         ┃ description       ┃
+┡━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩
+│ lm_agent           │ agent/overall                       │ Overall agent     │
+│                    │                                     │ leaderboard.      │
+│                    │                                     │ Headline signal   │
+│                    │                                     │ for autonomous    │
+│                    │                                     │ coding sessions.  │
+│ lm_agent_steer     │ agent_steerability/overall          │ Lands user        │
+│                    │                                     │ corrections       │
+│                    │                                     │ mid-session       │
+│                    │                                     │ instead of        │
+│                    │                                     │ ploughing on.     │
+│ lm_agent_tools     │ agent_tool_hallucination/overall    │ Avoids inventing  │
+│                    │                                     │ tools or calling  │
+│                    │                                     │ them with made-up │
+│                    │                                     │ arguments.        │
+│ lm_agent_finish    │ agent_task_outcome_explicit/overall │ Actually finishes │
+│                    │                                     │ the task, and     │
+│                    │                                     │ says so           │
+│                    │                                     │ explicitly when   │
+│                    │                                     │ it does.          │
+│ lm_agent_recovery  │ agent_bash_recovery_steps/overall   │ Recovers from a   │
+│                    │                                     │ failed shell      │
+│                    │                                     │ command in few    │
+│                    │                                     │ steps.            │
+│ lm_agent_sentiment │ agent_praise_complaint/overall      │ Praise-vs-compla… │
+│                    │                                     │ balance in        │
+│                    │                                     │ session feedback. │
+└────────────────────┴─────────────────────────────────────┴───────────────────┘
+
+Artificial Analysis evaluations                                                 
+┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ column              ┃ aa_key                                 ┃ description   ┃
+┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ aa_intelligence     │ artificial_analysis_intelligence_index │ AA            │
+│                     │                                        │ Intelligence  │
+│                     │                                        │ Index         │
+│                     │                                        │ (0-100).      │
+│                     │                                        │ Composite     │
+│                     │                                        │ across their  │
+│                     │                                        │ eval suite.   │
+│                     │                                        │ Also surfaced │
+│                     │                                        │ as the        │
+│                     │                                        │ rolled-up     │
+│                     │                                        │ `quality_ind… │
+│ aa_coding           │ artificial_analysis_coding_index       │ AA Coding     │
+│                     │                                        │ Index         │
+│                     │                                        │ (0-100).      │
+│                     │                                        │ Composite of  │
+│                     │                                        │ their coding  │
+│                     │                                        │ evaluations.  │
+│ aa_math             │ artificial_analysis_math_index         │ AA Math Index │
+│                     │                                        │ (0-100).      │
+│ aa_terminalbench    │ terminalbench_hard                     │ Terminal-Ben… │
+│                     │                                        │ Hard pass     │
+│                     │                                        │ rate.         │
+│                     │                                        │ Agentic: the  │
+│                     │                                        │ model drives  │
+│                     │                                        │ a shell to    │
+│                     │                                        │ complete real │
+│                     │                                        │ tasks.        │
+│                     │                                        │ Harness-meas… │
+│                     │                                        │ — see issue   │
+│                     │                                        │ #3.           │
+│ aa_terminalbench_v2 │ terminalbench_v2_1                     │ Terminal-Ben… │
+│                     │                                        │ v2.1 pass     │
+│                     │                                        │ rate. Newer   │
+│                     │                                        │ revision,     │
+│                     │                                        │ thinner       │
+│                     │                                        │ coverage.     │
+│ aa_tau2             │ tau2                                   │ tau-bench 2   │
+│                     │                                        │ pass rate.    │
+│                     │                                        │ Tool use      │
+│                     │                                        │ under a       │
+│                     │                                        │ customer-ser… │
+│                     │                                        │ policy.       │
+│ aa_lcr              │ lcr                                    │ Long-context  │
+│                     │                                        │ reasoning     │
+│                     │                                        │ pass rate.    │
+│ aa_ifbench          │ ifbench                                │ IFBench pass  │
+│                     │                                        │ rate.         │
+│                     │                                        │ Instruction   │
+│                     │                                        │ following.    │
+└─────────────────────┴────────────────────────────────────────┴───────────────┘
+
 Capability flags                                                                
 ┏━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ short ┃ capability       ┃ description                                       ┃
@@ -62,6 +149,10 @@ Notes:
 30-50 pt gaps are meaningful, sub-10 is noise.
   - `tier` is curated: 1=frontier, 2=workhorse, 3=practical, 4=local-only.
   - `aider` is the Aider polyglot `best_pass_rate_2` percentage.
+  - lm_agent_* are signed scores near 0, not Elo. Compare within the column 
+only.
+  - aa_* come from Artificial Analysis (https://artificialanalysis.ai/). Indices
+are 0-100; the rest are 0-1 pass rates.
 
 
 Next steps:

@@ -4,7 +4,7 @@
 
 lanista is a local model catalog and picker. It aggregates:
 
-- **Structured per-model data** from eight sources: OpenRouter, LiteLLM, pi-mono, LMArena (per-category Elo ratings), Aider's polyglot coding leaderboard, Factory AI Weather, gkisokay tiers, and Artificial Analysis.
+- **Structured per-model data** from eight sources: OpenRouter, LiteLLM, pi-mono, [LMArena](https://arena.ai/) (per-category Elo *and* the agent leaderboard), Aider's polyglot coding leaderboard, Factory AI Weather, gkisokay tiers, and [Artificial Analysis](https://artificialanalysis.ai/) (independent evaluations, pricing, speed).
 - **Prose practitioner opinions** from three feeds: [Simon Willison's Weblog](https://simonwillison.net/tags/llms/), [Eugene Yan's Blog](https://eugeneyan.com/), and model-release stories on [Hacker News](https://news.ycombinator.com/).
 
 The result: 2,700+ models, with per-task picks that are citation-grounded and verifiable.
@@ -56,6 +56,8 @@ what a rig can actually launch (no orphan Llama when you only have Copilot).
 - User copy: `~/.config/lanista/seats.json` (seeded on first use; edit freely)
 - Inspect resolution: `lanista seats herdr-agents`
 
+`lanista fetch` needs `ARTIFICIAL_ANALYSIS_KEY` for the Artificial Analysis source — a free key from the [Insights Platform](https://artificialanalysis.ai/insights). Without it that source is skipped, and `lanista doctor` says so.
+
 Optional: set `HF_TOKEN` (free at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)) to double your HuggingFace rate-limit budget.
 
 ## What `pick` actually looks like
@@ -79,6 +81,22 @@ Ten deliberately diverse tasks were each routed through `pick`. In four of ten, 
 - **On-device, privacy-sensitive** → three open-weight models (Gemma, Qwen MoE) — no hosted models at all
 
 The last one is the most striking: the catalog has no "runs locally" column. The subagent picked correctly by reaching into the opinion corpus (Willison's MLX recipe, Qwen-on-MacBook post) for a signal the table lacks. **The opinion block is not decoration.**
+
+## Benchmarks: three scales in one table
+
+`lanista columns` prints the full glossary. The short version, because mixing these up is the easy mistake:
+
+| Family | Scale | What it measures |
+|---|---|---|
+| `lm_*` | Elo, ~1500 at the frontier | LMArena crowd votes on single responses |
+| `lm_agent*` | signed score near 0 | LMArena [agent leaderboard](https://arena.ai/leaderboard/agent) — a model driving a coding agent across a whole session |
+| `aa_*` | 0-100 indices, 0-1 pass rates | Artificial Analysis' own evaluations, including Terminal-Bench and tau-bench |
+
+They answer different questions. `lm_coding` is "did people prefer its code snippet". `lm_agent` is "did it stay steerable, avoid hallucinating tools, and actually finish". `aa_terminalbench` is "did it complete real shell tasks unattended". Never compare a number across families.
+
+## Attribution
+
+Benchmark data from [Artificial Analysis](https://artificialanalysis.ai/), used under their free API terms. Leaderboard data from [LMArena](https://arena.ai/).
 
 ## License
 

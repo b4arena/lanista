@@ -50,9 +50,9 @@ def test_short_code_maps_invert_cleanly():
     assert len(cols.MODALITY_SHORT) == len(cols.MODALITIES)
 
 
-def test_glossary_covers_all_three_blocks():
+def test_glossary_covers_every_block():
     g = cols.glossary()
-    assert set(g) == {"lm_categories", "capabilities", "modalities"}
+    assert set(g) == {"lm_categories", "lm_agent", "aa_evals", "capabilities", "modalities"}
     assert set(g["lm_categories"]) == set(cols.LM_CATEGORIES)
     assert set(g["capabilities"]) == set(cols.CAPS)
     assert set(g["modalities"]) == set(cols.MODALITIES)

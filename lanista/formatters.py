@@ -340,6 +340,8 @@ class HumanFormatter(BaseFormatter):
     def columns(self, glossary: dict, notes: tuple[str, ...]) -> None:
         titles = {
             "lm_categories": ("LMArena Elo categories", "column", "lmarena_key"),
+            "lm_agent": ("LMArena agent leaderboard", "column", "lmarena_key"),
+            "aa_evals": ("Artificial Analysis evaluations", "column", "aa_key"),
             "capabilities": ("Capability flags", "short", "capability"),
             "modalities": ("Modalities", "short", "modality"),
         }

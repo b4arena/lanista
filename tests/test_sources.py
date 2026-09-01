@@ -107,8 +107,48 @@ def test_gkisokay_projection_preserves_entry():
     assert out["claude-opus-4-7"]["extracted"]["use_for"] == "y"
 
 
+def test_artificial_analysis_projects_api_rows():
+    raw = {
+        "status": 200,
+        "data": [
+            {
+                "id": "b8fc61f7",
+                "name": "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
+                "slug": "claude-opus-5",
+                "release_date": "2026-07-24",
+                "model_creator": {"slug": "anthropic"},
+                "evaluations": {
+                    "artificial_analysis_intelligence_index": 63.1,
+                    "artificial_analysis_coding_index": 78,
+                    "artificial_analysis_math_index": None,
+                    "terminalbench_v2_1": 0.89,
+                },
+                "pricing": {
+                    "price_1m_input_tokens": 5,
+                    "price_1m_output_tokens": 25,
+                    "price_1m_blended_3_to_1": 10,
+                },
+                "median_output_tokens_per_second": 48.766,
+                "median_time_to_first_token_seconds": 36.304,
+            }
+        ],
+    }
+    ex = artificial_analysis.project(raw)["claude-opus-5"]["extracted"]
+    # Keyed by slug, not the display name — AA's own guidance, and the slug
+    # already matches lanista's canonical shape.
+    assert ex["quality_index"] == 63.1
+    assert ex["speed_tokens_per_sec"] == 48.766
+    assert ex["ttft_sec"] == 36.304
+    assert ex["pricing_per_million"] == {"input": 5, "output": 25}
+    assert ex["aa_release_date"] == "2026-07-24"
+    assert ex["aa_creator"] == "anthropic"
+    # Nulls are dropped so a missing eval is absent, never a None column.
+    assert "artificial_analysis_math_index" not in ex["aa_evaluations"]
+    assert ex["aa_evaluations"]["terminalbench_v2_1"] == 0.89
+
+
 def test_artificial_analysis_empty_input_is_safe():
-    assert artificial_analysis.project({"models": {}}) == {}
+    assert artificial_analysis.project({"data": []}) == {}
     assert artificial_analysis.project({}) == {}
 
 
@@ -140,17 +180,11 @@ def test_gkisokay_seed_parses_and_has_tiers():
         assert entry.get("tier") in {1, 2, 3, 4}, f"{mid} has invalid tier"
 
 
-def test_aa_seed_entries_carry_known_numeric_fields():
-    """Every AA seed entry must carry at least one field the rollup recognizes.
+def test_artificial_analysis_is_no_longer_curated():
+    """The API replaced the hand-maintained seed.
 
-    The seed is hand-populated; this guards against typos and keeps the schema
-    honest as coverage grows.
+    A leftover ``curated=True`` would make lanista read a nine-model file from
+    the user's config dir instead of fetching 600+ measured models.
     """
-    ref = resources.files("lanista.data") / "artificial_analysis.seed.json"
-    data = json.loads(ref.read_text(encoding="utf-8"))
-    models = data.get("models") or {}
-    assert isinstance(models, dict)
-    known = {"speed_tokens_per_sec", "ttft_sec", "quality_index"}
-    for mid, entry in models.items():
-        assert isinstance(entry, dict), mid
-        assert known & set(entry.keys()), f"{mid} has no known numeric field"
+    assert artificial_analysis.SOURCE.curated is False
+    assert not (resources.files("lanista.data") / "artificial_analysis.seed.json").is_file()
