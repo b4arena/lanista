@@ -16,6 +16,7 @@ from dataclasses import dataclass
 
 import typer
 
+from lanista import columns as cols
 from lanista import doctor as dctr
 from lanista import index as idx
 from lanista import opinions as ops
@@ -571,6 +572,18 @@ def chart(
         )
         raise typer.Exit(1) from e
     print(res.stdout.strip() or out)
+
+
+@app.command()
+def columns(ctx: typer.Context) -> None:
+    """Glossary of catalog columns: lm_*, caps, modalities.
+
+    Rendered from ``lanista.columns`` — the same dicts the picker prompt
+    and the Pareto axis registry consume, so the glossary cannot drift
+    from what those commands actually accept.
+    """
+    state = _state(ctx)
+    state.formatter.columns(cols.glossary(), cols.NOTES)
 
 
 @app.command(name="refresh-opinions")

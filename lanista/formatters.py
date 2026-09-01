@@ -13,6 +13,7 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from rich.console import Console
+from rich.table import Table
 
 from lanista import paths
 
@@ -39,6 +40,8 @@ class BaseFormatter(ABC):
     def agents(self, agents: dict, filtered: bool = False) -> None: ...
     @abstractmethod
     def tier(self, level: int, results: list[dict], show_sources: bool = False) -> None: ...
+    @abstractmethod
+    def columns(self, glossary: dict, notes: tuple[str, ...]) -> None: ...
     @abstractmethod
     def doctor(self, checks: list[Check], fixes_applied: list[str] | None = None) -> None: ...
     @abstractmethod
@@ -343,6 +346,34 @@ class HumanFormatter(BaseFormatter):
             ]
         )
 
+    def columns(self, glossary: dict, notes: tuple[str, ...]) -> None:
+        titles = {
+            "lm_categories": ("LMArena Elo categories", "column", "lmarena_key"),
+            "capabilities": ("Capability flags", "short", "capability"),
+            "modalities": ("Modalities", "short", "modality"),
+        }
+        for block, entries in glossary.items():
+            title, left, right = titles.get(block, (block, "key", "canonical"))
+            table = Table(title=title, title_justify="left", title_style="bold")
+            table.add_column(left, style="cyan", no_wrap=True)
+            table.add_column(right, no_wrap=True)
+            table.add_column("description")
+            for key, meta in entries.items():
+                table.add_row(key, meta.get(right, ""), meta.get("description", ""))
+            self.out.print(table)
+            self.out.print("")
+        if notes:
+            self.out.print("[bold]Notes:[/bold]")
+            for n in notes:
+                self.out.print(f"  - {n}")
+            self.out.print("")
+        self.next_steps(
+            [
+                ("lanista --json columns", "Same glossary as structured JSON"),
+                ("lanista pareto lm_coding price_input", "Use a column as a Pareto axis"),
+            ]
+        )
+
     def doctor(self, checks: list[Check], fixes_applied: list[str] | None = None) -> None:
         buckets: dict[str, list[Check]] = {"error": [], "warn": [], "ok": []}
         for c in checks:
@@ -467,6 +498,9 @@ class JsonFormatter(BaseFormatter):
     def tier(self, level: int, results: list[dict], show_sources: bool = False) -> None:
         # JSON output always includes full observations; flag is ignored here.
         self._emit({"tier": level, "count": len(results), "models": results})
+
+    def columns(self, glossary: dict, notes: tuple[str, ...]) -> None:
+        self._emit({"glossary": glossary, "notes": list(notes)})
 
     def doctor(self, checks: list[Check], fixes_applied: list[str] | None = None) -> None:
         self._emit(

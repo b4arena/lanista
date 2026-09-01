@@ -14,6 +14,8 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from lanista.columns import LM_CATEGORIES
+
 
 def _ext(entry: dict, source: str) -> dict:
     for o in entry.get("observations") or []:
@@ -69,15 +71,17 @@ def _neg_ttft(entry: dict):
     return float(v)
 
 
+def _lm_accessor(key: str) -> Callable[[dict], float | None]:
+    # Factory, not an inline lambda: a lambda written directly inside the
+    # comprehension below would close over the loop variable and every
+    # accessor would resolve the last key.
+    return lambda e: _lm(e, key)
+
+
 COLUMN_ACCESSORS: dict[str, Callable[[dict], float | None]] = {
-    # quality axes
-    "lm_overall": lambda e: _lm(e, "overall"),
-    "lm_coding": lambda e: _lm(e, "coding"),
-    "lm_writing": lambda e: _lm(e, "creative_writing"),
-    "lm_hard": lambda e: _lm(e, "hard_prompts"),
-    "lm_long": lambda e: _lm(e, "longer_query"),
-    "lm_chinese": lambda e: _lm(e, "chinese"),
-    "lm_document": lambda e: _lm(e, "document/overall"),
+    # quality axes — pulled from columns.LM_CATEGORIES so the column
+    # set never drifts from the picker prompt / docs page.
+    **{alias: _lm_accessor(key) for alias, (key, _) in LM_CATEGORIES.items()},
     "aider": _aider,
     "quality_index": _quality_index,
     "speed_tokens_per_sec": _speed,

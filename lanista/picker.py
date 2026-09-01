@@ -11,21 +11,15 @@ that lack supporting opinion with ``[no-opinion-match]``.
 from __future__ import annotations
 
 from lanista import index as idx
+from lanista.columns import CAP_SHORT as _CAP_SHORT
+from lanista.columns import LM_CATEGORIES
+from lanista.columns import MODALITY_SHORT as _MODALITY_SHORT
 from lanista.opinions import cache as ocache
 from lanista.opinions.base import OpinionEntry
 
 MAX_OPINIONS = 40
 MAX_CATALOG_ROWS = 60
 EXCERPT_CHARS = 400
-
-_MODALITY_SHORT = {"text": "txt", "image": "img", "audio": "aud", "video": "vid", "pdf": "pdf"}
-_CAP_SHORT = {
-    "pdf_input": "pdf",
-    "computer_use": "cu",
-    "function_calling": "fn",
-    "vision": "vis",
-    "reasoning": "think",
-}
 
 
 def _compress_modalities(vals) -> str:
@@ -99,14 +93,10 @@ def _build_rows(models: dict) -> list[dict]:
                 "tier": notes.get("tier") if notes.get("tier") is not None else None,
                 "use_for": notes.get("use_for"),
                 "aider": _aider_pass(obs),
-                "lm_overall": _lm_rating(lm, "overall"),
-                "lm_coding": _lm_rating(lm, "coding"),
-                "lm_writing": _lm_rating(lm, "creative_writing"),
-                "lm_hard": _lm_rating(lm, "hard_prompts"),
-                "lm_long": _lm_rating(lm, "longer_query"),
-                "lm_english": _lm_rating(lm, "english"),
-                "lm_chinese": _lm_rating(lm, "chinese"),
-                "lm_document": _lm_rating(lm, "document/overall"),
+                **{
+                    alias: _lm_rating(lm, key)
+                    for alias, (key, _) in LM_CATEGORIES.items()
+                },
             }
         )
     # Prefer lm_overall (whole text leaderboard). Fall back to lm_document when
