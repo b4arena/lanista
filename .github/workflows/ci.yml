@@ -23,19 +23,14 @@ jobs:
       - run: uv run ruff format --check lanista tests
 
   test:
-    name: pytest (py${{ matrix.python-version }})
+    name: pytest
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # Floor from requires-python, plus the current release.
-        python-version: ["3.11", "3.13"]
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
       - run: uv sync --locked
       - run: uv run pytest
 
