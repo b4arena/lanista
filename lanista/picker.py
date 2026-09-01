@@ -93,27 +93,37 @@ def _build_rows(models: dict) -> list[dict]:
                 "tier": notes.get("tier") if notes.get("tier") is not None else None,
                 "use_for": notes.get("use_for"),
                 "aider": _aider_pass(obs),
-                **{
-                    alias: _lm_rating(lm, key)
-                    for alias, (key, _) in LM_CATEGORIES.items()
-                },
+                **{alias: _lm_rating(lm, key) for alias, (key, _) in LM_CATEGORIES.items()},
             }
         )
+
     # Prefer lm_overall (whole text leaderboard). Fall back to lm_document when
     # only the small document config is available — keeps the picker useful if
     # HF's datasets-server is 500'ing on the text config.
     def _score(r: dict) -> float:
         return r["lm_overall"] or r["lm_document"] or 0
+
     rows.sort(key=lambda r: (-_score(r), -(r["aider"] or 0), r["model"]))
     return rows[:MAX_CATALOG_ROWS]
 
 
 def _format_catalog_table(rows: list[dict]) -> str:
     headers = [
-        "model", "price_$/Mtok", "ctx", "aider",
-        "modalities", "caps", "tier",
-        "lm_overall", "lm_coding", "lm_writing",
-        "lm_hard", "lm_long", "lm_english", "lm_chinese", "lm_document",
+        "model",
+        "price_$/Mtok",
+        "ctx",
+        "aider",
+        "modalities",
+        "caps",
+        "tier",
+        "lm_overall",
+        "lm_coding",
+        "lm_writing",
+        "lm_hard",
+        "lm_long",
+        "lm_english",
+        "lm_chinese",
+        "lm_document",
     ]
     lines = [
         "| " + " | ".join(headers) + " |",
@@ -172,9 +182,7 @@ def _format_opinions(entries: list[OpinionEntry]) -> str:
         if len(excerpt) > EXCERPT_CHARS:
             excerpt = excerpt[:EXCERPT_CHARS].rstrip() + "…"
         parts.append(
-            f"[{e.id}] {e.source} — {e.date or 'n/a'} — {e.title}\n"
-            f"  URL: {e.url}\n"
-            f"  > {excerpt}"
+            f"[{e.id}] {e.source} — {e.date or 'n/a'} — {e.title}\n  URL: {e.url}\n  > {excerpt}"
         )
     return "\n\n".join(parts)
 

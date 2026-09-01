@@ -10,6 +10,7 @@ def test_frontier_drops_strictly_dominated():
     pairs = [("A", 10.0, 5.0), ("B", 20.0, 4.0), ("C", 15.0, 10.0)]
     assert pareto.pareto_frontier(pairs) == {"B"}
 
+
 def test_classic_three_point_case():
     # Higher-quality is better; lower-cost is better.
     # A: cheap+bad, B: mid+mid, C: premium+expensive, D: dominated (low q, high c)
@@ -38,12 +39,18 @@ def test_extract_pairs_skips_missing_values():
         "has-both": {
             "pricing_per_million": {"input": 2.0, "output": 10.0},
             "observations": [
-                {"source": "lmarena", "extracted": {"lmarena_ratings": {"coding": {"rating": 1500}}}},
+                {
+                    "source": "lmarena",
+                    "extracted": {"lmarena_ratings": {"coding": {"rating": 1500}}},
+                },
             ],
         },
         "no-price": {
             "observations": [
-                {"source": "lmarena", "extracted": {"lmarena_ratings": {"coding": {"rating": 1400}}}},
+                {
+                    "source": "lmarena",
+                    "extracted": {"lmarena_ratings": {"coding": {"rating": 1400}}},
+                },
             ],
         },
         "no-rating": {"pricing_per_million": {"input": 1.0, "output": 2.0}, "observations": []},

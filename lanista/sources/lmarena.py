@@ -28,9 +28,7 @@ import polars as pl
 from lanista import http
 from lanista.source_base import Source
 
-_PARQUET_BASE = (
-    "https://huggingface.co/api/datasets/lmarena-ai/leaderboard-dataset/parquet"
-)
+_PARQUET_BASE = "https://huggingface.co/api/datasets/lmarena-ai/leaderboard-dataset/parquet"
 CONFIGS: tuple[str, ...] = ("document", "text")
 
 

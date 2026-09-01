@@ -90,9 +90,7 @@ MODALITIES: dict[str, tuple[str, str]] = {
 # Inverse maps used by picker.py to compress raw catalog values into the
 # short codes shown in the prompt table.
 CAP_SHORT: dict[str, str] = {long: short for short, (long, _) in CAPS.items()}
-MODALITY_SHORT: dict[str, str] = {
-    long: short for short, (long, _) in MODALITIES.items()
-}
+MODALITY_SHORT: dict[str, str] = {long: short for short, (long, _) in MODALITIES.items()}
 
 
 # Free-text caveats that belong with the glossary rather than with any one
@@ -119,8 +117,7 @@ def glossary() -> dict[str, dict[str, dict[str, str]]]:
             for alias, (key, desc) in LM_CATEGORIES.items()
         },
         "capabilities": {
-            short: {"capability": name, "description": desc}
-            for short, (name, desc) in CAPS.items()
+            short: {"capability": name, "description": desc} for short, (name, desc) in CAPS.items()
         },
         "modalities": {
             short: {"modality": name, "description": desc}

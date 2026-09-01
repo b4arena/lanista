@@ -38,9 +38,7 @@ def test_resolve_pin_normalizes_dots_and_aliases():
     assert seatlib.resolve_pin_to_index("gpt-5.4-mini", models) == "gpt-5-4-mini"
     assert seatlib.resolve_pin_to_index("claude-opus-4.6", models) == "claude-opus-4-6"
     # soft suffix peel
-    assert (
-        seatlib.resolve_pin_to_index("claude-opus-4-6-thinking", models) == "claude-opus-4-6"
-    )
+    assert seatlib.resolve_pin_to_index("claude-opus-4-6-thinking", models) == "claude-opus-4-6"
     assert seatlib.resolve_pin_to_index("gpt-oss-120b-medium", models) == "gpt-oss-120b"
     assert seatlib.resolve_pin_to_index("totally-missing", models) is None
 

@@ -102,9 +102,7 @@ def available_columns() -> list[str]:
     return sorted(COLUMN_ACCESSORS.keys())
 
 
-def extract_pairs(
-    models: dict, quality: str, cost: str
-) -> list[tuple[str, float, float]]:
+def extract_pairs(models: dict, quality: str, cost: str) -> list[tuple[str, float, float]]:
     q_fn = COLUMN_ACCESSORS[quality]
     c_fn = COLUMN_ACCESSORS[cost]
     out: list[tuple[str, float, float]] = []

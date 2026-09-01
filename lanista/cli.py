@@ -279,9 +279,7 @@ def _pin_label(seat_match: seatlib.SeatMatch | None, index_id: str) -> str:
 @app.command()
 def seats(
     ctx: typer.Context,
-    seat_id: str | None = typer.Argument(
-        None, help="Seat id to inspect (omit to list all)"
-    ),
+    seat_id: str | None = typer.Argument(None, help="Seat id to inspect (omit to list all)"),
     provider: str | None = typer.Option(
         None, "--provider", "-p", help="Only show pins for this provider lane"
     ),
@@ -336,9 +334,7 @@ def seats(
         print("Matched:")
         for rp in match.resolved:
             role = f"  role={rp.pin.role}" if rp.pin.role else ""
-            print(
-                f"  {rp.pin.provider}/{rp.pin.pin:<28} -> {rp.index_id}{role}"
-            )
+            print(f"  {rp.pin.provider}/{rp.pin.pin:<28} -> {rp.index_id}{role}")
     if match.unresolved:
         print()
         print("Unresolved (not in catalog):")
@@ -355,10 +351,15 @@ def pareto(
     quality: str = typer.Argument(..., help="Quality axis (e.g. lm_coding, aider)"),
     cost: str = typer.Argument(..., help="Cost axis (e.g. price_input, price_avg, neg_ctx)"),
     csv: bool = typer.Option(False, "--csv", help="Emit CSV to stdout (pipeable)"),
-    max_cost: float | None = typer.Option(None, "--max-cost", help="Drop rows whose cost exceeds this"),
-    min_quality: float | None = typer.Option(None, "--min-quality", help="Drop rows below this quality"),
+    max_cost: float | None = typer.Option(
+        None, "--max-cost", help="Drop rows whose cost exceeds this"
+    ),
+    min_quality: float | None = typer.Option(
+        None, "--min-quality", help="Drop rows below this quality"
+    ),
     require_cap: str | None = typer.Option(
-        None, "--require-cap",
+        None,
+        "--require-cap",
         help="Only include models whose capabilities list contains this (e.g. pdf_input, vision)",
     ),
     min_ctx: int | None = typer.Option(
@@ -369,7 +370,9 @@ def pareto(
         None, "--seat", help="Restrict to a named seat allowlist (e.g. herdr-agents)"
     ),
     provider: str | None = typer.Option(
-        None, "--provider", "-p",
+        None,
+        "--provider",
+        "-p",
         help="Within --seat, only this provider lane (github-copilot, xai, openai-codex, agy)",
     ),
 ) -> None:
@@ -404,8 +407,13 @@ def pareto(
         raise typer.Exit(1)
     print(f"Pareto frontier ({q} ↑ vs {c} ↓) — {len(front)} model(s):")
     filt = _filter_bits(
-        seat_id=seat, provider=provider, seat_match=seat_match,
-        require_cap=require_cap, min_ctx=min_ctx, max_cost=max_cost, min_quality=min_quality,
+        seat_id=seat,
+        provider=provider,
+        seat_match=seat_match,
+        require_cap=require_cap,
+        min_ctx=min_ctx,
+        max_cost=max_cost,
+        min_quality=min_quality,
     )
     if filt:
         print("Filters: " + ", ".join(filt))
@@ -424,9 +432,12 @@ def profiles(
     quality: str = typer.Argument(..., help="Quality axis (e.g. lm_coding)"),
     cost: str = typer.Argument(..., help="Cost axis (e.g. price_input, -ctx)"),
     max_cost: float | None = typer.Option(None, "--max-cost", help="Drop rows above this cost"),
-    min_quality: float | None = typer.Option(None, "--min-quality", help="Drop rows below this quality"),
+    min_quality: float | None = typer.Option(
+        None, "--min-quality", help="Drop rows below this quality"
+    ),
     require_cap: str | None = typer.Option(
-        None, "--require-cap",
+        None,
+        "--require-cap",
         help="Only include models whose capabilities list contains this (e.g. pdf_input, vision)",
     ),
     min_ctx: int | None = typer.Option(
@@ -436,7 +447,9 @@ def profiles(
         None, "--seat", help="Restrict to a named seat allowlist (e.g. herdr-agents)"
     ),
     provider: str | None = typer.Option(
-        None, "--provider", "-p",
+        None,
+        "--provider",
+        "-p",
         help="Within --seat, only this provider lane (github-copilot, xai, openai-codex, agy)",
     ),
 ) -> None:
@@ -480,8 +493,13 @@ def profiles(
     frontier_ct = len(frontier_ids)
     print(f"Frontier has {frontier_ct} non-dominated model(s) over {len(pairs)} candidate(s).")
     filt_bits = _filter_bits(
-        seat_id=seat, provider=provider, seat_match=seat_match,
-        require_cap=require_cap, min_ctx=min_ctx, max_cost=max_cost, min_quality=min_quality,
+        seat_id=seat,
+        provider=provider,
+        seat_match=seat_match,
+        require_cap=require_cap,
+        min_ctx=min_ctx,
+        max_cost=max_cost,
+        min_quality=min_quality,
     )
     if filt_bits:
         print("Filters: " + ", ".join(filt_bits))
@@ -506,10 +524,15 @@ def chart(
     cost: str = typer.Argument(..., help="Cost axis"),
     out: str = typer.Option("chart.png", "--out", "-o", help="Output PNG path"),
     title: str | None = typer.Option(None, "--title", help="Chart title"),
-    max_cost: float | None = typer.Option(None, "--max-cost", help="Drop rows whose cost exceeds this"),
-    min_quality: float | None = typer.Option(None, "--min-quality", help="Drop rows below this quality"),
+    max_cost: float | None = typer.Option(
+        None, "--max-cost", help="Drop rows whose cost exceeds this"
+    ),
+    min_quality: float | None = typer.Option(
+        None, "--min-quality", help="Drop rows below this quality"
+    ),
     require_cap: str | None = typer.Option(
-        None, "--require-cap",
+        None,
+        "--require-cap",
         help="Only include models whose capabilities list contains this (e.g. pdf_input, vision)",
     ),
     min_ctx: int | None = typer.Option(
@@ -519,7 +542,9 @@ def chart(
         None, "--seat", help="Restrict to a named seat allowlist (e.g. herdr-agents)"
     ),
     provider: str | None = typer.Option(
-        None, "--provider", "-p",
+        None,
+        "--provider",
+        "-p",
         help="Within --seat, only this provider lane",
     ),
 ) -> None:
@@ -547,15 +572,24 @@ def chart(
     csv_blob = header + "\n".join(rows) + "\n"
     chart_title = title or f"{q} vs {c} (Pareto frontier highlighted)"
     cmd = [
-        "chartroom", "scatter",
-        "--csv", "-",
-        "-x", c,
-        "-y", "frontier",
-        "-y", "others",
-        "--title", chart_title,
-        "--xlabel", c,
-        "--ylabel", q,
-        "--output", out,
+        "chartroom",
+        "scatter",
+        "--csv",
+        "-",
+        "-x",
+        c,
+        "-y",
+        "frontier",
+        "-y",
+        "others",
+        "--title",
+        chart_title,
+        "--xlabel",
+        c,
+        "--ylabel",
+        q,
+        "--output",
+        out,
     ]
     try:
         res = subprocess.run(cmd, input=csv_blob, text=True, capture_output=True, check=True)

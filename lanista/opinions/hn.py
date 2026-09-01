@@ -32,9 +32,7 @@ QUERIES: tuple[str, ...] = (
 
 
 def _url(query: str) -> str:
-    params = urllib.parse.urlencode(
-        {"query": query, "tags": "story", "hitsPerPage": _HITS}
-    )
+    params = urllib.parse.urlencode({"query": query, "tags": "story", "hitsPerPage": _HITS})
     return f"{_ENDPOINT}?{params}"
 
 
