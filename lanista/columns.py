@@ -46,7 +46,8 @@ LM_CATEGORIES: dict[str, tuple[str, str]] = {
     ),
     "lm_document": (
         "document/overall",
-        "Wins on prompts that include an attached document (PDF, long text). Closest LMArena signal for 'can it ground answers in supplied material'.",
+        "Wins on prompts that include an attached document (PDF, long text). "
+        "Closest LMArena signal for 'can it ground answers in supplied material'.",
     ),
 }
 
@@ -92,3 +93,37 @@ CAP_SHORT: dict[str, str] = {long: short for short, (long, _) in CAPS.items()}
 MODALITY_SHORT: dict[str, str] = {
     long: short for short, (long, _) in MODALITIES.items()
 }
+
+
+# Free-text caveats that belong with the glossary rather than with any one
+# column. Kept here so the CLI, the docs page, and any future consumer read
+# the same wording.
+NOTES: tuple[str, ...] = (
+    "lm_* values are Elo ratings (relative, not %). ~1500 is current frontier; "
+    "30-50 pt gaps are meaningful, sub-10 is noise.",
+    "`tier` is curated: 1=frontier, 2=workhorse, 3=practical, 4=local-only.",
+    "`aider` is the Aider polyglot `best_pass_rate_2` percentage.",
+)
+
+
+def glossary() -> dict[str, dict[str, dict[str, str]]]:
+    """The three column blocks as one nested, JSON-serializable payload.
+
+    Shape is ``{block: {short: {canonical_key: value, "description": str}}}``.
+    Both formatter modes render from this, so ``lanista columns`` and
+    ``lanista --json columns`` can never describe different column sets.
+    """
+    return {
+        "lm_categories": {
+            alias: {"lmarena_key": key, "description": desc}
+            for alias, (key, desc) in LM_CATEGORIES.items()
+        },
+        "capabilities": {
+            short: {"capability": name, "description": desc}
+            for short, (name, desc) in CAPS.items()
+        },
+        "modalities": {
+            short: {"modality": name, "description": desc}
+            for short, (name, desc) in MODALITIES.items()
+        },
+    }

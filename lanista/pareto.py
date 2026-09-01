@@ -72,9 +72,10 @@ def _neg_ttft(entry: dict):
 
 
 def _lm_accessor(key: str) -> Callable[[dict], float | None]:
-    # Bind ``key`` per-iteration; without this, every lambda would close
-    # over the loop variable and resolve the final value.
-    return lambda e, _k=key: _lm(e, _k)
+    # Factory, not an inline lambda: a lambda written directly inside the
+    # comprehension below would close over the loop variable and every
+    # accessor would resolve the last key.
+    return lambda e: _lm(e, key)
 
 
 COLUMN_ACCESSORS: dict[str, Callable[[dict], float | None]] = {
