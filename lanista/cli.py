@@ -16,6 +16,7 @@ from dataclasses import dataclass
 
 import typer
 
+from lanista import aliases as al
 from lanista import columns as cols
 from lanista import doctor as dctr
 from lanista import index as idx
@@ -102,7 +103,14 @@ def show(
     """Inspect models whose id contains SUBSTR."""
     state = _state(ctx)
     data = _require_index(state)
-    hits = {k: v for k, v in data["models"].items() if substr.lower() in k.lower()}
+    low = substr.lower()
+    hits = {k: v for k, v in data["models"].items() if low in k.lower()}
+    # If no raw hit, normalize the query and retry against normalized keys.
+    # This lets 'gemini-3.1-pro' match catalog id 'gemini-3-1-pro'.
+    if not hits:
+        norm = al.normalize(substr)
+        if norm != low:
+            hits = {k: v for k, v in data["models"].items() if norm in al.normalize(k)}
     if not hits:
         state.formatter.error(
             f"no match for '{substr}'",
