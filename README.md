@@ -23,12 +23,28 @@ Most "which model?" questions have a shape. lanista has a tool for each:
 
 `pareto` and `profiles` are pure arithmetic — fast, deterministic, reproducible. `pick` reaches into the opinion corpus for signals the table can't express: "GLM-5.1 ran unattended for 8 hours" lives in a blog post, not a benchmark column.
 
+## Installation
+
+Requires [uv](https://docs.astral.sh/uv/). No PyPI release yet — install straight from GitHub:
+
+```bash
+# One-shot, no install (ephemeral, cached):
+uvx --from git+https://github.com/b4arena/lanista lanista --help
+
+# Persistent tool install:
+uv tool install git+https://github.com/b4arena/lanista
+lanista --help
+```
+
+Or from a local checkout (editable, so source edits apply without reinstall):
+
+```bash
+uv tool install --editable .
+```
+
 ## Quickstart
 
 ```bash
-# Install as a uv tool (editable, so source edits apply without reinstall):
-uv tool install --editable .
-
 # Pull every structured source + prose feed:
 lanista fetch
 lanista refresh-opinions
