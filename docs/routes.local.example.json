@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "_note": "EXAMPLE ONLY. All route ids and values are fake. Copy to $XDG_CONFIG_HOME/lanista/routes.local.json and edit. Never commit the real file.",
+  "routes": {
+    "example-gw/glm-5.3": {
+      "canonical": {"value": "glm-5-3", "source_note": "gateway model list says it serves zai-org/GLM-5.3", "as_of": "2026-01-01"},
+      "cost": {"value": "budget", "source_note": "gateway price sheet", "as_of": "2026-01-01"},
+      "pricing_per_million": {"value": {"input": 0.11, "output": 0.22, "currency": "USD"}, "source_note": "gateway price sheet", "as_of": "2026-01-01"},
+      "limits": {"value": {"rpm": 10, "tpm": 20000}, "source_note": "gateway quota page", "as_of": "2026-01-01"},
+      "context_window": {"value": 65536, "source_note": "gateway caps context below the model maximum", "as_of": "2026-01-01"}
+    },
+    "example-sub/muse-spark-open-816b-a42b": {
+      "canonical": {"value": "muse-spark-open-816b-a42b", "source_note": "deployment manifest names meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-01-01"},
+      "cost": {"value": "subscription", "source_note": "flat plan; no per-token price", "as_of": "2026-01-01"}
+    },
+    "example-gw/mystery-model": {
+      "cost": {"value": "unknown", "source_note": "no price published yet", "as_of": "2026-01-01"}
+    }
+  }
+}
