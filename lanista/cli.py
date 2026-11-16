@@ -23,6 +23,7 @@ from lanista import index as idx
 from lanista import opinions as ops
 from lanista import pareto as prt
 from lanista import picker as pkr
+from lanista import routes as rtes
 from lanista import routing as rt
 from lanista import seats as seatlib
 from lanista.formatters import BaseFormatter, OutputMode, get_formatter
@@ -635,6 +636,32 @@ def refresh_opinions(ctx: typer.Context) -> None:
     counts = ops.refresh_all()
     for name, n in counts.items():
         state.formatter.info(f"{name}: {n} entries")
+
+
+@app.command()
+def route(
+    ctx: typer.Context,
+    route_id: str = typer.Argument(..., help="Exact runtime route id, provider prefix included"),
+) -> None:
+    """Show one private route from routes.local.json (exact id match)."""
+    state = _state(ctx)
+    ov = rtes.load_overlay()
+    resolved = rtes.resolve_route(route_id, ov)
+    if resolved is None:
+        state.formatter.error(
+            f"route '{route_id}' not in {ov.path}",
+            hints=["Route ids match exactly (no alias/normalize).", "List: lanista routes"],
+        )
+        raise typer.Exit(1)
+    state.formatter.routes({"overlay": ov.summary(), "routes": {route_id: resolved}})
+
+
+@app.command()
+def routes(ctx: typer.Context) -> None:
+    """List private routes from the host-local routes.local.json overlay."""
+    state = _state(ctx)
+    ov = rtes.load_overlay()
+    state.formatter.routes({"overlay": ov.summary(), "routes": rtes.resolve_all(ov)})
 
 
 @app.command()
