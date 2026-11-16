@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from importlib import resources
 
 from lanista import aliases as al
-from lanista import paths
+from lanista import model_cards, paths
 
 # Strip these trailing tokens when a pin has no exact catalog hit.
 _SOFT_SUFFIXES = (
@@ -148,7 +148,9 @@ def _candidate_norms(pin: str, resolver: dict[str, str]) -> list[str]:
     can = al.resolve(pin, resolver)
     add(can)
     add(pin)
-    # soft suffix peel
+    # soft suffix peel. Never peel onto an id with explicit variant identity:
+    # 'deepseek-v4.1-flash-1017-latest' must not become the 1017 checkpoint.
+    protected = model_cards.protected_ids()
     cur = al.normalize(can)
     changed = True
     while changed:
@@ -158,6 +160,8 @@ def _candidate_norms(pin: str, resolver: dict[str, str]) -> list[str]:
             token = f"-{suf_n}"
             if cur.endswith(token) and len(cur) > len(token):
                 cur = cur[: -len(token)].rstrip("-")
+                if cur in protected:
+                    return out
                 add(cur)
                 changed = True
                 break

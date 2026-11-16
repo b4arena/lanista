@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "_note": "Public, sourced model facts. Every fact has value + source URL + as_of (the date the source was read). value null + status 'unknown' means the source does not say; unknown is never 0. Variants map one exact runtime id (equality after lanista.aliases.normalize) to one canonical id, each with a source. 'unproven' lists ids whose identity is NOT established; they are never merged. See docs/routes.md.",
+  "models": {
+    "glm-5-3": {
+      "display_name": "GLM-5.3",
+      "vendor": "Z.ai",
+      "facts": {
+        "architecture": {"value": "Mixture-of-Experts with DSA sparse attention (model_type glm_moe_dsa): 78 layers, 256 routed + 1 shared experts, 8 experts per token, MLA-style attention (q_lora_rank 2048, kv_lora_rank 512), DSA indexer top-k 2048", "source": "https://huggingface.co/zai-org/GLM-5.3/raw/main/config.json", "as_of": "2026-11-16", "note": "HF card: same base model as GLM-5.2, gains from post-training"},
+        "total_params": {"value": "753B", "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16", "note": "from the HF safetensors parameter metadata, not the card prose"},
+        "active_params": {"value": null, "status": "unknown", "note": "no official source states it"},
+        "input_modalities": {"value": ["text"], "source": "https://docs.z.ai/guides/llm/glm-5.3", "as_of": "2026-11-16", "note": "'currently supports text-only inputs'"},
+        "output_modalities": {"value": ["text"], "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16", "note": "HF pipeline tag text-generation"},
+        "context_window": {"value": 1048576, "source": "https://huggingface.co/zai-org/GLM-5.3/raw/main/config.json", "as_of": "2026-11-16", "note": "max_position_embeddings; Z.ai docs say 1M"},
+        "max_output": {"value": "128K", "source": "https://docs.z.ai/guides/llm/glm-5.3", "as_of": "2026-11-16", "note": "stated as 128K; exact token count not given"},
+        "capabilities": {"value": ["tool_calling", "structured_output_json", "streaming", "context_caching", "thinking_always_on (reasoning_effort low|high|max, default max)"], "source": "https://docs.z.ai/guides/llm/glm-5.3", "as_of": "2026-11-16"},
+        "license": {"value": "GLM-5.3 License (MIT-style, attribution required; model-as-a-service providers above $10B revenue need a Z.ai security review)", "source": "https://huggingface.co/zai-org/GLM-5.3/raw/main/LICENSE", "as_of": "2026-11-16"},
+        "open_weights": {"value": true, "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16"},
+        "release_date": {"value": "2026-08-18", "source": "https://docs.z.ai/release-notes/new-released", "as_of": "2026-11-16", "note": "press coverage says 2026-08-14; official release notes used"}
+      },
+      "benchmarks": [
+        {"name": "Terminal Bench 2.1", "score": 88.2, "setting": "Claude Code 2.1.207, temp 1.0, 65,536 max tokens, 6h timeout", "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16"},
+        {"name": "Terminal Bench 3.0", "score": 28.3, "setting": "Claude Code, max reasoning, 400K context, 128K output, avg@3", "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16"},
+        {"name": "DeepSWE v1.1", "score": 66.9, "setting": "mini-swe-agent, temp 0.95, 400K context", "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16"},
+        {"name": "NL2Repo", "score": 58.0, "setting": "temp 1.0, 64K max new tokens, 1M context", "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16"},
+        {"name": "FrontierSWE", "score": 78.1, "setting": "Proximal harness, 1M context, max effort (score as of 2026-08-14)", "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16"},
+        {"name": "CyberGym", "score": 84.5, "setting": "Claude Code, max reasoning, Pass@1 over 1,507 tasks", "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16"},
+        {"name": "Toolathlon Verified", "score": 73.0, "setting": "official evaluation service, pass@1 avg over 3 runs", "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16"},
+        {"name": "HLE w/ Tools", "score": 62.5, "setting": "temp 1.0, top_p 0.95, 163,840 max tokens, 300K context", "source": "https://huggingface.co/zai-org/GLM-5.3", "as_of": "2026-11-16"}
+      ],
+      "not_same_as": ["glm-5-3-flash", "glm-5-3-flashx", "glm-5-3-flashx-legal", "glm-5-3-prime", "glm-5-3-fp4", "glm-5-3-fast", "glm-5-3-abliterated", "glm-5-2", "glm-5"]
+    },
+    "deepseek-v4-1-flash-1017": {
+      "display_name": "DeepSeek-V4.1-Flash-1017",
+      "vendor": "DeepSeek",
+      "facts": {
+        "architecture": {"value": "Causal encoder-decoder MoE: 40 layers (20 encoder + 20 decoder), CSA2 sparse attention with hierarchical sparse indexer, FP4 KV cache, 1 shared + 384 routed experts with 6 active, DeepSeek-ViT vision encoder", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash", "as_of": "2026-11-16", "note": "described on the V4.1-Flash base card; the 1017 card calls 1017 'a minor update to DeepSeek-V4.1-Flash' and its config.json is byte-identical to the base repo"},
+        "total_params": {"value": "552B", "source": "https://api-docs.deepseek.com/news/news260910/", "as_of": "2026-11-16", "note": "vendor text says 552B-parameter MoE; HF safetensors metadata for the 1017 repo reports 763,205,315,794; the base card lists 196B Engram conditional memory separately; the sources do not reconcile these"},
+        "active_params": {"value": "8B prefill / 16B decode", "source": "https://api-docs.deepseek.com/news/news260910/", "as_of": "2026-11-16", "note": "stated for V4.1-Flash; 1017 is a minor update with identical config"},
+        "input_modalities": {"value": ["text", "image"], "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16", "note": "image-text-to-text; API pricing page lists Vision: supported"},
+        "output_modalities": {"value": ["text"], "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"},
+        "context_window": {"value": "1M", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16", "note": "card settings table says 1M; exact token count not read from an official page"},
+        "max_output": {"value": "384K", "source": "https://api-docs.deepseek.com/quick_start/pricing/", "as_of": "2026-11-16", "note": "DeepSeek API maximum; card recommends max_tokens >= 256K"},
+        "capabilities": {"value": ["thinking_and_non_thinking_modes", "reasoning_effort_1_100", "tool_calling", "json_output", "chat_prefix_completion_beta", "fim_beta_non_thinking_only"], "source": "https://api-docs.deepseek.com/quick_start/pricing/", "as_of": "2026-11-16"},
+        "license": {"value": "MIT (code and weights)", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"},
+        "open_weights": {"value": true, "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"},
+        "release_date": {"value": "2026-10-17", "source": "https://api-docs.deepseek.com/updates/", "as_of": "2026-11-16"}
+      },
+      "benchmarks": [
+        {"name": "HLE w/o tools", "score": 42.6, "setting": "full set (44.0 on the text-only subset)", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"},
+        {"name": "Terminal-Bench 4.0", "score": 42.3, "setting": "Claude Code harness", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"},
+        {"name": "DeepSWE v1.1", "score": 77.0, "setting": "Mini-SWE-V2 harness", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"},
+        {"name": "ProgramBench", "score": 29.1, "setting": "unknown", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"},
+        {"name": "NL2Repo-Bench", "score": 68.2, "setting": "unknown", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"},
+        {"name": "Automation-Bench v1.0.6", "score": 60.5, "setting": "unknown", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"},
+        {"name": "Apex Bench v1.1", "score": 72.1, "setting": "unknown", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"},
+        {"name": "Chartography", "score": 83.0, "setting": "with tools", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "as_of": "2026-11-16"}
+      ],
+      "not_same_as": ["deepseek-v4-1-flash", "deepseek-v4-flash", "deepseek-v4-flash-0731", "deepseek-v4-1-flash-260910", "deepseek-v4-1-flash-20260910", "deepseek-v4-1-flash-abliterated", "deepseek-v4-1-flash-fast-fp4"]
+    },
+    "muse-spark-open-816b-a42b": {
+      "display_name": "Muse Spark Open (Muse-Spark-Open-816B-A42B, BF16)",
+      "vendor": "Meta",
+      "facts": {
+        "architecture": {"value": "Mixture-of-Experts transformer with Perception Encoder: 62 layers, 256 experts with 8 active per token, GQA 128 query / 16 KV heads, 1.8B vision encoder", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        "total_params": {"value": "816B", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16", "note": "HF safetensors header reports 822B"},
+        "active_params": {"value": "42B", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        "input_modalities": {"value": ["text", "image", "video", "audio"], "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        "output_modalities": {"value": ["text"], "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        "context_window": {"value": "1M", "source": "https://research.meta.ai/blog/muse-spark-open", "as_of": "2026-11-16", "note": "'1M at inference'"},
+        "max_output": {"value": null, "status": "unknown", "note": "no official source states it"},
+        "capabilities": {"value": ["tool_calling", "reasoning_effort low|medium|high|xhigh (default xhigh)", "agentic_coding", "multimodal_reasoning"], "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        "license": {"value": "Muse Model License (limited commercial terms; 'Built with Muse Spark Open' attribution; separate agreement for model-as-a-service above $20M revenue)", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        "open_weights": {"value": true, "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16", "note": "gated repo"},
+        "release_date": {"value": "2026-10-15", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        "lineage": {"value": "derived from the Muse Spark model released in August, with additional safety post-training; a distinct checkpoint from hosted Muse Spark 1.x", "source": "https://dev.meta.ai/models/muse-spark-open", "as_of": "2026-11-16"}
+      },
+      "benchmarks": [
+        {"name": "AA Intelligence Index", "score": 39, "setting": "reasoning xhigh, temp 1.0, top_p 1.0", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        {"name": "MCP-Atlas", "score": 89.2, "setting": "reasoning xhigh, temp 1.0, top_p 1.0", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        {"name": "GDPVal-AA v2", "score": 1401, "setting": "Elo-style; reasoning xhigh", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        {"name": "OSWorld Verified", "score": 80.4, "setting": "reasoning xhigh, temp 1.0, top_p 1.0", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        {"name": "Terminal-Bench 2.1", "score": 76.4, "setting": "Terminus 2 agent, reasoning xhigh", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        {"name": "HLE (with tools)", "score": 61.0, "setting": "reasoning xhigh", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        {"name": "GPQA Diamond", "score": 89.0, "setting": "reasoning xhigh", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"},
+        {"name": "DeepSWE 1.1", "score": 60, "setting": "preferred harness, reasoning xhigh", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "as_of": "2026-11-16"}
+      ],
+      "not_same_as": ["muse-spark", "muse-spark-1-1", "muse-spark-1-2", "muse-spark-1-3", "muse-spark-1-2-contributor", "muse-spark-1-3-contributor", "muse-spark-open-816b-a42b-nvfp4", "muse-glimmer-30b", "muse-ember"]
+    }
+  },
+  "variants": {
+    "zai/glm-5.3": {"canonical": "glm-5-3", "source": "https://docs.z.ai/guides/llm/glm-5.3", "note": "Z.ai API model code glm-5.3"},
+    "zai-org/GLM-5.3": {"canonical": "glm-5-3", "source": "https://huggingface.co/zai-org/GLM-5.3", "note": "official HF repo id"},
+    "zai-org-glm-5-3": {"canonical": "glm-5-3", "source": "https://huggingface.co/zai-org/GLM-5.3", "note": "catalog id of hosts that serve the HF repo by its exact id (<host>/zai-org/GLM-5.3)"},
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017": {"canonical": "deepseek-v4-1-flash-1017", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "note": "official HF repo id"},
+    "deepseek-ai-deepseek-v4-1-flash-1017": {"canonical": "deepseek-v4-1-flash-1017", "source": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017", "note": "catalog id of hosts that serve the HF repo by its exact id (<host>/deepseek-ai/DeepSeek-V4.1-Flash-1017)"},
+    "meta-models/Muse-Spark-Open-816B-A42B": {"canonical": "muse-spark-open-816b-a42b", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "note": "official HF repo id (BF16)"},
+    "meta-models-muse-spark-open-816b-a42b": {"canonical": "muse-spark-open-816b-a42b", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B", "note": "catalog id of hosts that serve the HF repo by its exact id (<host>/meta-models/Muse-Spark-Open-816B-A42B)"}
+  },
+  "unproven": {
+    "muse-spark-open": {"candidates": ["muse-spark-open-816b-a42b", "muse-spark-open-816b-a42b-nvfp4"], "reason": "not an official checkpoint id (only the HF collection slug); a host may serve BF16 or NVFP4 weights", "source": "https://dev.meta.ai/resources/blog/build-with-muse-spark-open"},
+    "meta-models-muse-spark-open": {"candidates": ["muse-spark-open-816b-a42b", "muse-spark-open-816b-a42b-nvfp4"], "reason": "host id names the collection, not a checkpoint", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B"},
+    "meta-muse-spark-open": {"candidates": ["muse-spark-open-816b-a42b", "muse-spark-open-816b-a42b-nvfp4"], "reason": "host id names the collection, not a checkpoint", "source": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B"},
+    "deepseek-v4-1-flash-20261017": {"candidates": ["deepseek-v4-1-flash-1017"], "reason": "LMArena label; no official source ties it to the 1017 checkpoint", "source": "https://api-docs.deepseek.com/updates/"},
+    "deepseek-flash": {"candidates": ["deepseek-v4-1-flash-1017"], "reason": "floating DeepSeek API alias that serves the latest build; not pinned to a checkpoint", "source": "https://api-docs.deepseek.com/updates/"},
+    "deepseek-v4p1-flash-1017": {"candidates": ["deepseek-v4-1-flash-1017"], "reason": "host-specific id; no official source", "source": "https://api-docs.deepseek.com/updates/"},
+    "glm-5p3": {"candidates": ["glm-5-3"], "reason": "host-specific id; no official source", "source": "https://docs.z.ai/guides/llm/glm-5.3"}
+  }
+}
