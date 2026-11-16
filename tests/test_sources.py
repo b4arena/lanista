@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from importlib import resources
+from pathlib import Path
 
 from lanista.sources import (
     aider,
@@ -107,44 +108,65 @@ def test_gkisokay_projection_preserves_entry():
     assert out["claude-opus-4-7"]["extracted"]["use_for"] == "y"
 
 
-def test_artificial_analysis_projects_api_rows():
-    raw = {
-        "status": 200,
-        "data": [
-            {
-                "id": "b8fc61f7",
-                "name": "Claude Opus 5 (Adaptive Reasoning, Max Effort)",
-                "slug": "claude-opus-5",
-                "release_date": "2026-07-24",
-                "model_creator": {"slug": "anthropic"},
-                "evaluations": {
-                    "artificial_analysis_intelligence_index": 63.1,
-                    "artificial_analysis_coding_index": 78,
-                    "artificial_analysis_math_index": None,
-                    "terminalbench_v2_1": 0.89,
-                },
-                "pricing": {
-                    "price_1m_input_tokens": 5,
-                    "price_1m_output_tokens": 25,
-                    "price_1m_blended_3_to_1": 10,
-                },
-                "median_output_tokens_per_second": 48.766,
-                "median_time_to_first_token_seconds": 36.304,
-            }
-        ],
-    }
-    ex = artificial_analysis.project(raw)["claude-opus-5"]["extracted"]
-    # Keyed by slug, not the display name — AA's own guidance, and the slug
-    # already matches lanista's canonical shape.
-    assert ex["quality_index"] == 63.1
-    assert ex["speed_tokens_per_sec"] == 48.766
-    assert ex["ttft_sec"] == 36.304
-    assert ex["pricing_per_million"] == {"input": 5, "output": 25}
-    assert ex["aa_release_date"] == "2026-07-24"
-    assert ex["aa_creator"] == "anthropic"
+AA_FIXTURE = Path(__file__).parent / "fixtures" / "aa_language_models_free.json"
+
+
+def test_artificial_analysis_projects_free_endpoint_rows():
+    # Recorded from one live call to /api/v2/language/models/free (2 rows).
+    raw = json.loads(AA_FIXTURE.read_text())
+    out = artificial_analysis.project(raw)
+    assert set(out) == {"glm-4-5v", "claude-sonnet-5-5-medium"}
+    # Keyed by slug, not the display name — AA's own guidance.
+    ex = out["claude-sonnet-5-5-medium"]["extracted"]
+    assert ex["quality_index"] == 30.8
+    assert ex["artificial_analysis_intelligence_index"] == 30.8
+    assert ex["speed_tokens_per_sec"] == 103.47
+    assert ex["ttft_sec"] == 1.43
+    assert ex["pricing_per_million"] == {"input": 2, "output": 10}
+    assert ex["aa_price_blended"] == 4.0
+    assert ex["aa_release_date"] == "2026-09-28"
+    assert ex["aa_creator_name"] == "Anthropic"
     # Nulls are dropped so a missing eval is absent, never a None column.
-    assert "artificial_analysis_math_index" not in ex["aa_evaluations"]
-    assert ex["aa_evaluations"]["terminalbench_v2_1"] == 0.89
+    assert "artificial_analysis_coding_index" not in ex["aa_evaluations"]
+    assert ex["aa_evaluations"]["artificial_analysis_legal_index"] == 38.8
+    # A model with no scores still gets speed and price, but no quality_index.
+    bare = out["glm-4-5v"]["extracted"]
+    assert "quality_index" not in bare
+    assert bare["aa_evaluations"] == {}
+    assert bare["pricing_per_million"] == {"input": 0.6, "output": 1.8}
+
+
+def test_artificial_analysis_speed_falls_back_to_performance_v3():
+    # `performance` returns null from 2026-12-10.
+    row = {
+        "slug": "m",
+        "performance": {"median_output_tokens_per_second": None},
+        "performance_v3": {
+            "mean_output_tokens_per_second": 50.0,
+            "mean_time_to_first_token_seconds": 2.0,
+        },
+    }
+    ex = artificial_analysis.project({"data": [row]})["m"]["extracted"]
+    assert ex["speed_tokens_per_sec"] == 50.0
+    assert ex["ttft_sec"] == 2.0
+
+
+def test_artificial_analysis_fetch_follows_pagination(monkeypatch):
+    pages = {
+        1: {"data": [{"slug": "a"}], "pagination": {"has_more": True}},
+        2: {"data": [{"slug": "b"}], "pagination": {"has_more": False}},
+    }
+    seen = []
+
+    def fake(url, headers=None, **_):
+        seen.append(url)
+        return pages[int(url.rsplit("=", 1)[1])]
+
+    monkeypatch.setenv("ARTIFICIAL_ANALYSIS_KEY", "test-key")
+    monkeypatch.setattr(artificial_analysis.http, "fetch_json", fake)
+    blob = artificial_analysis.fetch()
+    assert [r["slug"] for r in blob["data"]] == ["a", "b"]
+    assert seen == [f"{artificial_analysis.API_URL}?page={n}" for n in (1, 2)]
 
 
 def test_artificial_analysis_empty_input_is_safe():
