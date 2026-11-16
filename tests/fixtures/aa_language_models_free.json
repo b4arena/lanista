@@ -1,0 +1,95 @@
+{
+  "tier": "free",
+  "intelligence_index_version": 5,
+  "pagination": {
+    "page": 1,
+    "page_size": 2,
+    "total_pages": 4,
+    "has_more": true
+  },
+  "data": [
+    {
+      "id": "0081ab31-d10a-44a0-a10d-eee5533fec65",
+      "name": "GLM-4.5V (Non-reasoning)",
+      "slug": "glm-4-5v",
+      "release_date": "2025-08-11",
+      "model_creator": {
+        "id": "67437eb6-7dc1-4e93-befd-22c8b8ec2065",
+        "name": "Z AI"
+      },
+      "evaluations": {
+        "artificial_analysis_intelligence_index": null,
+        "artificial_analysis_coding_index": null,
+        "artificial_analysis_agentic_index": null,
+        "artificial_analysis_finance_and_accounting_index": null,
+        "artificial_analysis_strategy_and_ops_index": null,
+        "artificial_analysis_legal_index": null,
+        "artificial_analysis_healthcare_and_medical_index": null,
+        "artificial_analysis_engineering_index": null,
+        "artificial_analysis_economics_index": null
+      },
+      "artificial_analysis_intelligence_index_cost": null,
+      "pricing": {
+        "price_1m_input_tokens": 0.6,
+        "price_1m_output_tokens": 1.8,
+        "price_1m_cache_hit_tokens": 0.11,
+        "price_1m_cache_write_tokens": null
+      },
+      "performance": {
+        "median_output_tokens_per_second": 45.29,
+        "median_time_to_first_token_seconds": 3.43,
+        "median_time_to_first_answer_token_seconds": 3.43,
+        "median_end_to_end_response_time_seconds": 14.47
+      },
+      "performance_v3": {
+        "mean_output_tokens_per_second": 44.73,
+        "mean_time_to_first_token_seconds": 8.16,
+        "mean_time_to_first_answer_token_seconds": 8.16
+      }
+    },
+    {
+      "id": "042e8a37-fcd0-40f4-8f41-99215fb68eda",
+      "name": "Claude Sonnet 5.5 (Medium, Default Fallback)",
+      "slug": "claude-sonnet-5-5-medium",
+      "release_date": "2026-09-28",
+      "model_creator": {
+        "id": "f0aa413f-e8ae-4fcd-9c48-0e049f4f3128",
+        "name": "Anthropic"
+      },
+      "evaluations": {
+        "artificial_analysis_intelligence_index": 30.8,
+        "artificial_analysis_coding_index": null,
+        "artificial_analysis_agentic_index": null,
+        "artificial_analysis_finance_and_accounting_index": 40.7,
+        "artificial_analysis_strategy_and_ops_index": 46.7,
+        "artificial_analysis_legal_index": 38.8,
+        "artificial_analysis_healthcare_and_medical_index": 40.2,
+        "artificial_analysis_engineering_index": 37.3,
+        "artificial_analysis_economics_index": 39.2
+      },
+      "artificial_analysis_intelligence_index_cost": {
+        "total_cost": 679.16,
+        "cost_per_task": {
+          "total_cost": 0.7807
+        }
+      },
+      "pricing": {
+        "price_1m_input_tokens": 2,
+        "price_1m_output_tokens": 10,
+        "price_1m_cache_hit_tokens": 0.1,
+        "price_1m_cache_write_tokens": 2.5
+      },
+      "performance": {
+        "median_output_tokens_per_second": 103.47,
+        "median_time_to_first_token_seconds": 1.43,
+        "median_time_to_first_answer_token_seconds": 1.43,
+        "median_end_to_end_response_time_seconds": 6.26
+      },
+      "performance_v3": {
+        "mean_output_tokens_per_second": 127.94,
+        "mean_time_to_first_token_seconds": 4.26,
+        "mean_time_to_first_answer_token_seconds": 4.26
+      }
+    }
+  ]
+}
