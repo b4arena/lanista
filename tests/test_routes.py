@@ -199,3 +199,110 @@ def test_doctor_reports_overlay_state(xdg):
     assert c.status == "ok" and "loaded 3" in c.message
     _write("{bad")
     assert overlay_check().status == "warn"
+
+
+def test_explicit_null_masks_the_card_absent_inherits(xdg):
+    _write(
+        {
+            "schema": 1,
+            "routes": {
+                "example-gw/masked": {
+                    "canonical": _fact("glm-5-3"),
+                    "context_window": {"value": None, "source_note": "gateway hides it"},
+                    "modalities": {"value": None},
+                },
+                "example-gw/inherits": {"canonical": _fact("glm-5-3")},
+            },
+        }
+    )
+    assert rt.load_overlay().diagnostics == []
+    masked = rt.resolve_route("example-gw/masked")["fields"]
+    for name in ("context_window", "modalities"):
+        assert masked[name]["value"] is None
+        assert masked[name]["status"] == "unknown"
+        assert masked[name]["origin"] == "local"
+    inherits = rt.resolve_route("example-gw/inherits")["fields"]
+    assert inherits["context_window"]["origin"] == "catalog"
+    assert inherits["context_window"]["value"] == 1048576
+    assert inherits["modalities"]["origin"] == "catalog"
+
+
+@pytest.mark.parametrize(
+    "fname, value",
+    [
+        ("pricing_per_million", {"inpt": 0.1}),
+        ("pricing_per_million", {"input": float("inf")}),
+        ("pricing_per_million", {"input": -0.1}),
+        ("pricing_per_million", {"input": "0.1"}),
+        ("pricing_per_million", {"input": True}),
+        ("pricing_per_million", {"input": 0.1, "currency": ""}),
+        ("limits", {"rmp": 10}),
+        ("limits", {"rpm": float("nan")}),
+        ("limits", {"tpm": -5}),
+        ("limits", {}),
+        ("modalities", {}),
+        ("modalities", {"input": []}),
+        ("modalities", {"input": ["txt"]}),
+        ("modalities", {"inputs": ["text"]}),
+        ("capabilities", {"funcion_calling": True}),
+        ("capabilities", {"vision": "yes"}),
+        ("capabilities", {}),
+        ("context_window", 0),
+        ("cost", "free"),
+    ],
+)
+def test_invalid_values_are_skipped(xdg, fname, value):
+    _write({"schema": 1, "routes": {"example-gw/a": {fname: _fact(value)}}})
+    ov = rt.load_overlay()
+    assert fname not in ov.routes["example-gw/a"]
+    assert any(fname in d for d in ov.diagnostics)
+
+
+@pytest.mark.parametrize(
+    "fact",
+    [
+        {"value": 1000, "source_note": "", "as_of": "2026-01-01"},
+        {"value": 1000, "source_note": "x", "as_of": "last week"},
+        {"value": 1000, "source_note": "x", "as_of": 20260101},
+        {"value": 1000, "source_note": "x"},
+        {"value": None, "as_of": "soon"},
+    ],
+)
+def test_provenance_is_validated(xdg, fact):
+    _write({"schema": 1, "routes": {"example-gw/a": {"context_window": fact}}})
+    ov = rt.load_overlay()
+    assert "context_window" not in ov.routes["example-gw/a"]
+    assert ov.diagnostics
+
+
+def test_valid_values_pass(xdg):
+    route = {
+        "pricing_per_million": _fact({"input": 0, "output": 1.5, "currency": "USD"}),
+        "limits": _fact({"rpm": 1, "tpm": None}),
+        "modalities": _fact({"input": ["text", "image"], "output": ["text"]}),
+        "capabilities": _fact({"reasoning": True, "vision": False, "json": None}),
+    }
+    _write({"schema": 1, "routes": {"example-gw/a": route}})
+    ov = rt.load_overlay()
+    assert ov.diagnostics == []
+    assert set(ov.routes["example-gw/a"]) == set(route)
+
+
+def test_route_capabilities_never_inherit_from_card(xdg):
+    _write(
+        {
+            "schema": 1,
+            "routes": {
+                "example-gw/none": {"canonical": _fact("glm-5-3")},
+                "example-gw/some": {
+                    "canonical": _fact("glm-5-3"),
+                    "capabilities": _fact({"function_calling": True}),
+                },
+            },
+        }
+    )
+    assert mc.card_for("glm-5-3")["facts"]["capabilities"]["value"]  # card has them
+    none = rt.resolve_route("example-gw/none")["fields"]["capabilities"]
+    assert none == {"value": None, "status": "unknown", "origin": "unknown"}
+    some = rt.resolve_route("example-gw/some")["fields"]["capabilities"]
+    assert some["value"] == {"function_calling": True} and some["origin"] == "local"
