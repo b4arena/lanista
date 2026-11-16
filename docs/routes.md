@@ -72,13 +72,30 @@ Path: `$XDG_CONFIG_HOME/lanista/routes.local.json` (default
 
 - The route id is the exact runtime id the harness is started with, provider
   prefix included.
-- Every field is optional and is `{value, source_note, as_of}`. A non-null
-  value needs `source_note` and `as_of`. `value: null` means unknown.
-- `cost` is a class, the same values as vega: `subscription | budget | unknown`.
-  A subscription is not a token budget: give it no `pricing_per_million`.
-- Unknown fields, bad values, missing notes and unknown top-level keys are
-  skipped with a diagnostic. A file that is not valid JSON, has the wrong
-  `schema` or no `routes` object disables the whole overlay with one diagnostic.
+- Every field is optional and is `{value, source_note, as_of}`.
+  `source_note` and `as_of` must be non-empty strings when present; `as_of`
+  is an ISO date (`YYYY-MM-DD`). A non-null value needs both.
+- **Absent vs null.** A field that is absent inherits from the public model
+  card where that is allowed (see precedence). A field set to
+  `{"value": null}` masks the card: it stays unknown with `origin: local`.
+  Use it when the route is known to differ but the real value is not known.
+
+| Field | `value` type | Allowed content |
+|---|---|---|
+| `canonical` | string | a canonical id (ideally one with a model card) |
+| `cost` | string | `subscription`, `budget`, `unknown` |
+| `pricing_per_million` | object | keys `input`, `output` (finite number >= 0 or null), optional `currency` (non-empty string) |
+| `limits` | object | keys `rpm`, `tpm` (finite number >= 0 or null) |
+| `context_window`, `max_output` | integer | > 0 |
+| `modalities` | object | keys `input`, `output`; each a non-empty list of `text`, `image`, `audio`, `video`, `file` |
+| `capabilities` | object | keys `reasoning`, `function_calling`, `vision`, `json`, `structured_output`, `streaming`, `prompt_caching`; each `true`, `false` or `null` |
+
+- `cost` is a class, the same values as vega. A subscription is not a token
+  budget: give it no `pricing_per_million`.
+- Typos (`inpt`, `rmp`, `funcion_calling`), unknown fields, bad values and bad
+  provenance are skipped with a diagnostic; the rest of the route still loads.
+  A file that is not valid JSON, has the wrong `schema` or no `routes` object
+  disables the whole overlay with one diagnostic.
 
 ### Ownership and precedence (shared contract with vega)
 
@@ -86,11 +103,15 @@ Path: `$XDG_CONFIG_HOME/lanista/routes.local.json` (default
 - `routes.local.json` owns route id → canonical id and the route facts above.
   vega's `canonical` and `cost` in `seats.local.json` are deprecated fallbacks.
 - Join key: the route id string, compared exactly. No alias or normalize.
-- Precedence per field: `routes.local.json` → public model card → unknown.
-  `cost`, `pricing_per_million` and `limits` have no catalog fallback: a
-  vendor's public price is a fact about the vendor's own API, never the price
-  of some other route. `context_window`, `max_output` and `modalities` fall
-  back to the model card of the route's canonical id.
+- Precedence per field: `routes.local.json` (including an explicit null) →
+  public model card → unknown.
+  `cost`, `pricing_per_million`, `limits` and `capabilities` have no catalog
+  fallback: a vendor's public price is a fact about the vendor's own API,
+  never the price of some other route, and a card's capabilities say what the
+  model can do, not what a gateway exposes. Card capabilities appear only as
+  model facts (`lanista show`), never as route capabilities.
+  `context_window`, `max_output` and `modalities` fall back to the model card
+  of the route's canonical id when the field is absent.
 - Each resolved field carries `origin`: `local`, `catalog` or `unknown`.
   Route records carry `visibility: "private-local"`.
 
