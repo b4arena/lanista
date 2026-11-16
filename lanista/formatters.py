@@ -45,6 +45,8 @@ class BaseFormatter(ABC):
     @abstractmethod
     def doctor(self, checks: list[Check], fixes_applied: list[str] | None = None) -> None: ...
     @abstractmethod
+    def routes(self, payload: dict) -> None: ...
+    @abstractmethod
     def info(self, message: str) -> None: ...
     @abstractmethod
     def warning(self, message: str) -> None: ...
@@ -248,6 +250,9 @@ class HumanFormatter(BaseFormatter):
                 self.out.print(f"  tier:      {notes.get('tier', '?')}  [dim]\\[gkisokay][/dim]")
                 if notes.get("use_for"):
                     self.out.print(f"  use for:   {notes['use_for']}  [dim]\\[gkisokay][/dim]")
+            self._render_card(rec.get("model_card"))
+            for route_id, route in (rec.get("routes") or {}).items():
+                self._render_route(route_id, route)
             if show_sources:
                 self._render_observations(rec.get("observations") or [], skip=None)
             self.out.print("")
@@ -257,6 +262,46 @@ class HumanFormatter(BaseFormatter):
                 ("lanista show <substr> --no-sources", "Hide per-source attribution"),
             ]
         )
+
+    def _render_card(self, card: dict | None) -> None:
+        if not card:
+            return
+        self.out.print(f"  [bold]Model card:[/bold] {card.get('display_name', '?')}")
+        for name, fact in (card.get("facts") or {}).items():
+            val = fact.get("value")
+            if val is None:
+                self.out.print(f"    {name}: [yellow]unknown[/yellow]")
+                continue
+            if isinstance(val, list):
+                val = ", ".join(str(v) for v in val)
+            self.out.print(
+                f"    {name}: {val}  [dim]\\[{fact.get('source')} @ {fact.get('as_of')}][/dim]"
+            )
+        for b in card.get("benchmarks") or []:
+            self.out.print(
+                f"    bench {b['name']}: {b['score']}  [dim]\\[{b['source']} @ {b['as_of']}][/dim]"
+            )
+
+    def _render_route(self, route_id: str, route: dict) -> None:
+        vis = route.get("visibility", "?")
+        self.out.print(f"  [bold]Route[/bold] [magenta]{route_id}[/magenta] [dim]({vis})[/dim]")
+        for name, fact in (route.get("fields") or {}).items():
+            val = fact.get("value")
+            shown = "[yellow]unknown[/yellow]" if val is None else str(val)
+            note = fact.get("source_note") or fact.get("source") or ""
+            self.out.print(f"    {name}: {shown}  [dim]\\[{fact.get('origin')}] {note}[/dim]")
+
+    def routes(self, payload: dict) -> None:
+        ov = payload.get("overlay") or {}
+        for d in ov.get("diagnostics") or []:
+            self.warning(d)
+        routes = payload.get("routes") or {}
+        if not routes:
+            self.out.print(f"no routes in {ov.get('path')}")
+            return
+        for route_id, route in routes.items():
+            self._render_route(route_id, route)
+            self.out.print(f"    canonical: {route.get('canonical') or 'unknown'}")
 
     def agents(self, agents: dict, filtered: bool = False) -> None:
         if filtered:
@@ -509,6 +554,9 @@ class JsonFormatter(BaseFormatter):
                 "fixes_applied": fixes_applied or [],
             }
         )
+
+    def routes(self, payload: dict) -> None:
+        self._emit(payload)
 
     def info(self, message: str) -> None:
         self.err.print(f"[INFO] {message}")

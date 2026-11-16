@@ -13,7 +13,8 @@ from datetime import UTC, datetime, timedelta
 from importlib import resources
 from typing import Literal
 
-from lanista import paths
+from lanista import model_cards, paths
+from lanista import routes as routes_mod
 from lanista.http import aa_headers, fetch_text
 from lanista.sources import SOURCES, pimono
 from lanista.sources.litellm import URL as LITELLM_URL
@@ -206,6 +207,54 @@ def _check_index() -> tuple[Check, dict | None]:
     )
 
 
+def _check_model_cards() -> Check:
+    problems = model_cards.validate(model_cards.load_cards())
+    n = len(model_cards.cards())
+    if problems:
+        return Check(
+            name="model cards",
+            status="error",
+            message=f"{len(problems)} problem(s): {problems[0]}",
+        )
+    return Check(
+        name="model cards",
+        status="ok",
+        message=f"{n} sourced cards, {len(model_cards.variants())} explicit variant ids",
+    )
+
+
+def _check_route_overlay() -> Check:
+    ov = routes_mod.load_overlay()
+    if not ov.present:
+        return Check(
+            name="route overlay",
+            status="ok",
+            message=f"not present (optional, private/local): {ov.path}",
+        )
+    if not ov.loaded:
+        return Check(
+            name="route overlay",
+            status="warn",
+            message=f"not loaded: {ov.diagnostics[0] if ov.diagnostics else '?'} ({ov.path})",
+            fix_hint="see docs/routes.md for the schema",
+        )
+    if ov.diagnostics:
+        return Check(
+            name="route overlay",
+            status="warn",
+            message=(
+                f"loaded {len(ov.routes)} route(s), {len(ov.diagnostics)} skipped "
+                f"entr(y/ies): {ov.diagnostics[0]} ({ov.path})"
+            ),
+            fix_hint="run: lanista routes  (prints every diagnostic)",
+        )
+    return Check(
+        name="route overlay",
+        status="ok",
+        message=f"loaded {len(ov.routes)} private route(s): {ov.path}",
+    )
+
+
 def _check_index_age(data: dict | None) -> Check | None:
     if data is None:
         return None
@@ -285,6 +334,8 @@ def run_checks(verbose: bool = False) -> list[Check]:
     checks.extend(_check_curated_sources())
     checks.append(_check_aliases())
     checks.append(_check_api_keys())
+    checks.append(_check_model_cards())
+    checks.append(_check_route_overlay())
     idx_check, idx_data = _check_index()
     checks.append(idx_check)
     age_check = _check_index_age(idx_data)

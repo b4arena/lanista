@@ -32,7 +32,8 @@ from datetime import UTC, datetime, timedelta
 from importlib import resources
 
 from lanista import aliases as aliases_mod
-from lanista import paths
+from lanista import model_cards, paths
+from lanista import routes as routes_mod
 from lanista.source_base import Source
 from lanista.sources import SOURCES, pimono
 
@@ -112,6 +113,8 @@ def run_fetch(info: InfoCallback | None = None) -> FetchReport:
     now_iso = datetime.now(UTC).isoformat()
 
     resolver = aliases_mod.build_resolver(aliases_mod.load_aliases().get("aliases", {}))
+    # Explicit, sourced variant identity wins over user aliases.
+    resolver.update(model_cards.variant_resolver())
 
     models: dict[str, dict] = {}
     pimono_raw: dict | None = None
@@ -181,7 +184,30 @@ def run_fetch(info: InfoCallback | None = None) -> FetchReport:
 
 
 def load_index() -> dict | None:
+    """Read the fetched index and add public model cards + the private route overlay.
+
+    Both are applied at read time, so the index file on disk stays public-only
+    and edits to ``routes.local.json`` apply without a refetch.
+    """
     p = paths.index_path()
     if not p.exists():
         return None
-    return json.loads(p.read_text(encoding="utf-8"))
+    data = json.loads(p.read_text(encoding="utf-8"))
+    apply_overlays(data)
+    return data
+
+
+def apply_overlays(data: dict, overlay: routes_mod.Overlay | None = None) -> dict:
+    models = data.setdefault("models", {})
+    for canonical, card in model_cards.cards().items():
+        entry = models.get(canonical)
+        if entry is not None:
+            entry["model_card"] = card
+    ov = overlay if overlay is not None else routes_mod.load_overlay()
+    data["route_overlay"] = ov.summary()
+    for route_id, resolved in routes_mod.resolve_all(ov).items():
+        canonical = resolved.get("canonical")
+        entry = models.get(canonical) if canonical else None
+        if entry is not None:
+            entry.setdefault("routes", {})[route_id] = resolved
+    return data

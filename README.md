@@ -72,6 +72,18 @@ what a rig can actually launch (no orphan Llama when you only have Copilot).
 - User copy: `~/.config/lanista/seats.json` (seeded on first use; edit freely)
 - Inspect resolution: `lanista seats herdr-agents`
 
+### Model cards and private routes
+
+- **Model cards** (`lanista/data/model_cards.json`, public, packaged): sourced
+  facts (architecture, params, modalities, capabilities, benchmarks) with a URL
+  and as-of date per fact; unknown stays `unknown`. Runtime ids map to a
+  canonical id only through an explicit, sourced variant list — build dates,
+  parameter shapes and quantizations are never merged by guesswork.
+- **Private routes** (`~/.config/lanista/routes.local.json`, host-local,
+  never in the repo, never written by `fetch`): per-route cost class, price,
+  limits and context overrides. `lanista route <id> --json`, `lanista routes`,
+  `lanista doctor`. See [docs/routes.md](docs/routes.md).
+
 `lanista fetch` needs `ARTIFICIAL_ANALYSIS_KEY` for the Artificial Analysis source — a free key from the [Insights Platform](https://artificialanalysis.ai/insights). Without it that source is skipped, and `lanista doctor` says so.
 
 Optional: set `HF_TOKEN` (free at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)) to double your HuggingFace rate-limit budget.
